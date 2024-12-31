@@ -11,15 +11,20 @@
         </div>
 
         <form @submit.prevent="handleLogin" class="auth-form">
+          <div v-if="authStore.error" class="error-message">
+            {{ authStore.error }}
+          </div>
+
           <div class="form-group">
             <div class="input-wrapper">
-              <i class="fas fa-envelope"></i>
+              <i class="fas fa-user"></i>
               <input 
-                type="email" 
-                id="email" 
-                v-model="email" 
-                placeholder="Email address"
+                type="text" 
+                id="username" 
+                v-model="username" 
+                placeholder="Username"
                 required
+                :disabled="authStore.loading"
               >
             </div>
           </div>
@@ -33,6 +38,7 @@
                 v-model="password"
                 placeholder="Password"
                 required
+                :disabled="authStore.loading"
               >
               <button 
                 type="button" 
@@ -52,9 +58,16 @@
             <a href="#" class="forgot-password">Forgot Password?</a>
           </div>
 
-          <button type="submit" class="submit-btn">
-            <span>Sign In</span>
-            <i class="fas fa-arrow-right"></i>
+          <button 
+            type="submit" 
+            class="submit-btn"
+            :disabled="authStore.loading"
+          >
+            <span v-if="!authStore.loading">Sign In</span>
+            <span v-else>
+              <i class="fas fa-spinner fa-spin"></i>
+              Loading...
+            </span>
           </button>
 
           <div class="social-login">
@@ -95,15 +108,28 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
 
-const email = ref('')
+const authStore = useAuthStore()
+const router = useRouter()
+
+const username = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const rememberMe = ref(false)
 
-const handleLogin = () => {
-  // Login işlemleri burada yapılacak
-  console.log('Login:', { email: email.value, password: password.value })
+const handleLogin = async () => {
+  try {
+    const success = await authStore.login(username.value, password.value)
+    
+    if (success) {
+      // Login başarılı - ana sayfaya yönlendir
+      router.push('/')
+    }
+  } catch (error) {
+    console.error('Login error:', error)
+  }
 }
 </script>
 
@@ -207,6 +233,7 @@ const handleLogin = () => {
 .auth-header p {
   color: #6b7280;
   font-size: 1.1rem;
+  
 }
 
 .auth-form {
@@ -403,5 +430,23 @@ const handleLogin = () => {
   .auth-header h1 {
     font-size: 2rem;
   }
+}
+
+.error-message {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.fa-spinner {
+  margin-right: 0.5rem;
 }
 </style> 

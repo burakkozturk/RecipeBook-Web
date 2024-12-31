@@ -1,3 +1,16 @@
+<script setup>
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
+
+const authStore = useAuthStore()
+const router = useRouter()
+
+const handleLogout = () => {
+  authStore.logout()
+  router.push('/login')
+}
+</script>
+
 <template>
   <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
@@ -26,9 +39,7 @@
             </router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" to="/categories" active-class="active">
-              Categories
-            </router-link>
+            <router-link to="/categories" class="nav-link">Categories</router-link>
           </li>
           <li class="nav-item search-item">
             <div class="search-box">
@@ -46,12 +57,27 @@
 
         <!-- Auth Buttons -->
         <div class="d-flex gap-3 auth-buttons">
-          <router-link to="/login" class="btn btn-login">
-            Login
-          </router-link>
-          <router-link to="/register" class="btn btn-register">
-            Register
-          </router-link>
+          <!-- Giriş yapılmamışsa -->
+          <template v-if="!authStore.isAuthenticated()">
+            <router-link to="/login" class="btn btn-login">
+              Login
+            </router-link>
+            <router-link to="/register" class="btn btn-register">
+              Register
+            </router-link>
+          </template>
+
+          <!-- Giriş yapılmışsa -->
+          <template v-else>
+            <router-link to="/profile" class="btn btn-profile">
+              <i class="fas fa-user"></i>
+              Profile
+            </router-link>
+            <button @click="handleLogout" class="btn btn-logout">
+              <i class="fas fa-sign-out-alt"></i>
+              Sign Out
+            </button>
+          </template>
         </div>
       </div>
     </div>
@@ -174,6 +200,38 @@
   color: #fff;
 }
 
+.btn-profile {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-profile:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.btn-logout {
+  background-color: #FF6B6B;
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-logout:hover {
+  background-color: #ff5252;
+  color: #fff;
+}
+
+.btn i {
+  font-size: 1rem;
+}
+
 @media (max-width: 991px) {
   .navbar-collapse {
     background-color: #6C63FF;
@@ -196,7 +254,7 @@
 
   .btn {
     width: 100%;
-    text-align: center;
+    justify-content: center;
   }
 
   .search-box {

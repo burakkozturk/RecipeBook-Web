@@ -22,7 +22,7 @@ const router = createRouter({
       component: () => import('../views/AddRecipeView.vue')
     },
     {
-      path: '/profilim',
+      path: '/profile',
       name: 'profile',
       component: () => import('../views/ProfileView.vue')
     },
@@ -40,6 +40,11 @@ const router = createRouter({
       path: '/register',
       name: 'register',
       component: () => import('../views/RegisterView.vue')
+    },
+    {
+      path: '/categories',
+      name: 'categories',
+      component: () => import('../views/CategoriesView.vue')
     }
   ]
 })

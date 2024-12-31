@@ -6,22 +6,30 @@
         <p>Discover our most popular and trending recipes</p>
       </div>
 
-      <div class="row g-4">
-        <!-- Recipe Card -->
-        <div class="col-md-4" v-for="recipe in featuredRecipes" :key="recipe.id">
-          <div class="recipe-card">
-            <div class="recipe-image" :style="{ backgroundImage: `url(${recipe.image})` }">
-              <span class="recipe-tag">{{ recipe.tag }}</span>
+      <div class="recipes-grid">
+        <div v-for="recipe in featuredRecipes" :key="recipe.id" class="recipe-card">
+          <div class="recipe-image" :style="{ backgroundImage: `url(${recipe.image})` }">
+            <div class="recipe-overlay">
+              <div class="recipe-time">
+                <i class="far fa-clock"></i>
+                {{ recipe.cookTime }} mins
+              </div>
+              <div class="recipe-difficulty">
+                {{ recipe.difficulty }}
+              </div>
             </div>
-            <div class="recipe-content">
-              <h3>{{ recipe.title }}</h3>
-              <p>{{ recipe.description }}</p>
-              <div class="recipe-meta">
-                <span><i class="far fa-clock"></i> {{ recipe.time }} mins</span>
-                <span><i class="fas fa-signal"></i> {{ recipe.difficulty }}</span>
+          </div>
+          <div class="recipe-content">
+            <div class="recipe-category">{{ recipe.category }}</div>
+            <h3 class="recipe-title">{{ recipe.title }}</h3>
+            <p class="recipe-description">{{ recipe.description }}</p>
+            <div class="recipe-footer">
+              <div class="recipe-stats">
+                <span><i class="fas fa-heart"></i> {{ recipe.likes }}</span>
+                <span><i class="fas fa-comment"></i> {{ recipe.comments }}</span>
               </div>
               <router-link :to="recipe.link" class="view-recipe">
-                View Recipe <i class="fas fa-arrow-right"></i>
+                View Recipe
               </router-link>
             </div>
           </div>
@@ -35,33 +43,39 @@
 const featuredRecipes = [
   {
     id: 1,
-    title: 'Turkish Kebab',
-    description: 'Traditional Turkish kebab with special spices and sauce',
-    image: new URL('@/assets/food.jpg', import.meta.url).href,
-    tag: 'Popular',
-    time: 45,
+    title: 'Classic Margherita Pizza',
+    description: 'Traditional Italian pizza with fresh basil, mozzarella, and tomato sauce',
+    image: '/src/assets/recipes/pizza.jpg',
+    category: 'Italian',
+    cookTime: 30,
     difficulty: 'Medium',
-    link: '/recipe/turkish-kebab'
+    likes: 245,
+    comments: 18,
+    link: '/recipe/margherita-pizza'
   },
   {
     id: 2,
-    title: 'Carbonara Pasta',
-    description: 'Classic Italian pasta with creamy sauce and bacon',
-    image: new URL('@/assets/pasta.webp', import.meta.url).href,
-    tag: 'Trending',
-    time: 30,
+    title: 'Chocolate Lava Cake',
+    description: 'Decadent chocolate dessert with a molten center',
+    image: '/src/assets/recipes/chocolate-cake.jpg',
+    category: 'Desserts',
+    cookTime: 25,
     difficulty: 'Easy',
-    link: '/recipe/carbonara'
+    likes: 189,
+    comments: 12,
+    link: '/recipe/chocolate-lava-cake'
   },
   {
     id: 3,
-    title: 'Mediterranean Salad',
-    description: 'Fresh and healthy Mediterranean style salad',
-    image: new URL('@/assets/food.jpg', import.meta.url).href,
-    tag: 'Healthy',
-    time: 15,
+    title: 'Asian Stir-Fry Noodles',
+    description: 'Quick and flavorful noodles with vegetables and your choice of protein',
+    image: '/src/assets/recipes/noodles.jpg',
+    category: 'Asian',
+    cookTime: 20,
     difficulty: 'Easy',
-    link: '/recipe/mediterranean-salad'
+    likes: 167,
+    comments: 15,
+    link: '/recipe/stir-fry-noodles'
   }
 ]
 </script>
@@ -69,111 +83,144 @@ const featuredRecipes = [
 <style scoped>
 .featured-section {
   padding: 5rem 0;
-  background-color: #f8f9fa;
+  background-color: white;
 }
 
 .section-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 3.5rem;
 }
 
 .section-header h2 {
   font-size: 2.5rem;
-  font-weight: 700;
-  color: #2D3748;
-  margin-bottom: 1rem;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
 }
 
 .section-header p {
-  color: #718096;
+  color: #64748b;
   font-size: 1.1rem;
+}
+
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .recipe-card {
   background: white;
-  border-radius: 20px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  height: 100%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .recipe-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
 }
 
 .recipe-image {
-  height: 250px;
+  height: 280px;
   background-size: cover;
   background-position: center;
   position: relative;
-  transition: all 0.3s ease;
 }
 
-.recipe-card:hover .recipe-image {
-  transform: scale(1.05);
-}
-
-.recipe-tag {
+.recipe-overlay {
   position: absolute;
   top: 1rem;
   left: 1rem;
-  background: #FF6B6B;
-  color: white;
+  right: 1rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.recipe-time, .recipe-difficulty {
+  background: rgba(255, 255, 255, 0.9);
   padding: 0.5rem 1rem;
-  border-radius: 100px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .recipe-content {
   padding: 1.5rem;
 }
 
-.recipe-content h3 {
-  font-size: 1.3rem;
+.recipe-category {
+  color: #6C63FF;
+  font-size: 0.9rem;
   font-weight: 600;
-  margin-bottom: 0.8rem;
-  color: #2D3748;
+  margin-bottom: 0.5rem;
 }
 
-.recipe-content p {
-  color: #718096;
-  margin-bottom: 1rem;
+.recipe-title {
+  font-size: 1.4rem;
+  color: #1e293b;
+  margin-bottom: 0.8rem;
+  line-height: 1.3;
+}
+
+.recipe-description {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
   line-height: 1.5;
 }
 
-.recipe-meta {
+.recipe-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.recipe-stats {
   display: flex;
   gap: 1rem;
-  margin-bottom: 1.2rem;
-  color: #718096;
+  color: #64748b;
   font-size: 0.9rem;
 }
 
-.recipe-meta span {
+.recipe-stats span {
   display: flex;
   align-items: center;
   gap: 0.4rem;
 }
 
-.recipe-meta i {
+.recipe-stats i {
   color: #6C63FF;
 }
 
 .view-recipe {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #6C63FF;
+  background: #6C63FF;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
   text-decoration: none;
+  font-size: 0.9rem;
   font-weight: 500;
-  transition: gap 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .view-recipe:hover {
-  gap: 0.8rem;
+  background: #5B52E5;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 1200px) {
+  .recipes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
@@ -183,6 +230,15 @@ const featuredRecipes = [
 
   .section-header h2 {
     font-size: 2rem;
+  }
+
+  .recipes-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .recipe-image {
+    height: 240px;
   }
 }
 </style> 

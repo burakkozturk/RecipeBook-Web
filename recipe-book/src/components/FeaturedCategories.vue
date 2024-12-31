@@ -3,17 +3,21 @@
     <div class="container">
       <div class="section-header">
         <h2>Featured Categories</h2>
-        <p>Explore recipes by category</p>
+        <p>Explore our most popular recipe categories</p>
       </div>
 
       <div class="categories-grid">
         <div v-for="category in categories" :key="category.id" class="category-card">
-          <router-link :to="category.link" class="category-link">
-            <div class="category-icon">
-              <i :class="category.icon"></i>
+          <router-link :to="category.link" class="category-content">
+            <div class="category-bg" :style="{ backgroundImage: `url(${category.image})` }"></div>
+            <div class="category-overlay"></div>
+            <div class="category-info">
+              <h3>{{ category.name }}</h3>
+              <p>{{ category.count }} Recipes</p>
+              <span class="explore-btn">
+                Explore <i class="fas fa-arrow-right"></i>
+              </span>
             </div>
-            <h3>{{ category.name }}</h3>
-            <p>{{ category.count }} Recipes</p>
           </router-link>
         </div>
       </div>
@@ -22,48 +26,43 @@
 </template>
 
 <script setup>
+import mainDishesImg from '@/assets/main.webp'
+import dessertsImg from '@/assets/dessert.webp'
+import beveragesImg from '@/assets/beverages.jpeg'
+import soupImg from '@/assets/soup.webp'
+
 const categories = [
   {
     id: 1,
     name: 'Main Dishes',
     icon: 'fas fa-utensils',
     count: 120,
-    link: '/category/main-dishes'
+    link: '/category/main-dishes',
+    image: mainDishesImg
   },
   {
     id: 2,
     name: 'Desserts',
     icon: 'fas fa-cookie',
     count: 85,
-    link: '/category/desserts'
+    link: '/category/desserts',
+    image: dessertsImg
   },
   {
     id: 3,
-    name: 'Breakfast',
-    icon: 'fas fa-egg',
-    count: 65,
-    link: '/category/breakfast'
+    name: 'Beverages',
+    icon: 'fas fa-glass-martini-alt',
+    count: 45,
+    link: '/category/beverages',
+    image: beveragesImg
   },
   {
     id: 4,
-    name: 'Healthy',
-    icon: 'fas fa-carrot',
-    count: 95,
-    link: '/category/healthy'
-  },
-  {
-    id: 5,
-    name: 'Turkish',
-    icon: 'fas fa-moon',
-    count: 75,
-    link: '/category/turkish'
-  },
-  {
-    id: 6,
-    name: 'Vegetarian',
-    icon: 'fas fa-leaf',
-    count: 60,
-    link: '/category/vegetarian'
+    name: 'Soups',
+    icon: 'fas fa-soup',
+    count: 35,
+    link: '/category/soups',
+    image: soupImg
   }
 ]
 </script>
@@ -71,7 +70,7 @@ const categories = [
 <style scoped>
 .categories-section {
   padding: 5rem 0;
-  background: white;
+  background-color: #f8fafc;
 }
 
 .section-header {
@@ -81,76 +80,137 @@ const categories = [
 
 .section-header h2 {
   font-size: 2.5rem;
-  font-weight: 700;
-  color: #2D3748;
+  color: #1e293b;
   margin-bottom: 0.5rem;
 }
 
 .section-header p {
-  color: #718096;
+  color: #64748b;
   font-size: 1.1rem;
 }
 
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  padding: 0.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .category-card {
-  background: white;
+  height: 380px;
   border-radius: 16px;
   overflow: hidden;
-  transition: all 0.3s ease;
-  border: 1px solid #e2e8f0;
+  position: relative;
 }
 
-.category-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  border-color: #6C63FF;
-}
-
-.category-link {
-  text-decoration: none;
-  color: inherit;
+.category-content {
   display: block;
-  padding: 2rem;
-  text-align: center;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: white;
+  position: relative;
 }
 
-.category-icon {
-  width: 70px;
-  height: 70px;
-  background: #6C63FF;
-  border-radius: 50%;
-  display: flex;
+.category-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.5s ease;
+}
+
+.category-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.1),
+    rgba(0, 0, 0, 0.7)
+  );
+  transition: background 0.3s ease;
+}
+
+.category-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 2rem;
+  transform: translateY(0);
+  transition: transform 0.3s ease;
+}
+
+.category-info h3 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.category-info p {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin-bottom: 1rem;
+}
+
+.explore-btn {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem;
+  gap: 0.5rem;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateY(10px);
   transition: all 0.3s ease;
 }
 
-.category-card:hover .category-icon {
-  transform: scale(1.1);
-  background: #FF6B6B;
+.explore-btn i {
+  transition: transform 0.3s ease;
 }
 
-.category-icon i {
-  font-size: 1.8rem;
-  color: white;
+/* Hover Effects */
+.category-card:hover .category-bg {
+  transform: scale(1.05);
 }
 
-.category-card h3 {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #2D3748;
-  margin-bottom: 0.5rem;
+.category-card:hover .category-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.2),
+    rgba(0, 0, 0, 0.8)
+  );
 }
 
-.category-card p {
-  color: #718096;
-  font-size: 0.9rem;
+.category-card:hover .category-info {
+  transform: translateY(0);
+}
+
+.category-card:hover .explore-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.category-card:hover .explore-btn i {
+  transform: translateX(5px);
+}
+
+@media (max-width: 1200px) {
+  .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .category-card {
+    height: 320px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -162,28 +222,22 @@ const categories = [
     font-size: 2rem;
   }
 
-  .categories-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-
-  .category-link {
-    padding: 1.5rem;
-  }
-
-  .category-icon {
-    width: 60px;
-    height: 60px;
-  }
-
-  .category-icon i {
-    font-size: 1.5rem;
+  .category-card {
+    height: 280px;
   }
 }
 
 @media (max-width: 480px) {
   .categories-grid {
     grid-template-columns: 1fr;
+  }
+
+  .section-header h2 {
+    font-size: 1.8rem;
+  }
+
+  .category-card {
+    height: 250px;
   }
 }
 </style> 
