@@ -61,13 +61,13 @@
 
 <script setup>
 import beveragesImg from '@/assets/beverages.jpeg'
-import breadsImg from '@/assets/beverages.jpeg'
-import breakfastImg from '@/assets/beverages.jpeg'
+import breadsImg from '@/assets/bread.webp'
+import breakfastImg from '@/assets/breakfast.jpeg'
 import dessertsImg from '@/assets/dessert.webp'
-import dietaryImg from '@/assets/beverages.jpeg'
+import dietaryImg from '@/assets/diet.webp'
 import mainCoursesImg from '@/assets/main.webp'
-import saladsImg from '@/assets/beverages.jpeg'
-import snacksImg from '@/assets/beverages.jpeg'
+import saladsImg from '@/assets/salad.webp'
+import snacksImg from '@/assets/snack.webp'
 import soupImg from '@/assets/soup.webp'
 
 const categories = [
