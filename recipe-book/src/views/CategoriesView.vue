@@ -14,25 +14,33 @@
     <div class="stats-section">
       <div class="container">
         <div class="stats-grid">
-          <div class="stat-item">
-            <i class="fas fa-th-large"></i>
-            <div class="stat-info">
-              <span class="stat-number">9</span>
-              <span class="stat-label">Categories</span>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-th-large"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-value">9</h3>
+              <p class="stat-label">Categories</p>
             </div>
           </div>
-          <div class="stat-item">
-            <i class="fas fa-utensils"></i>
-            <div class="stat-info">
-              <span class="stat-number">500+</span>
-              <span class="stat-label">Recipes</span>
+
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-utensils"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-value">500+</h3>
+              <p class="stat-label">Recipes</p>
             </div>
           </div>
-          <div class="stat-item">
-            <i class="fas fa-users"></i>
-            <div class="stat-info">
-              <span class="stat-number">50k+</span>
-              <span class="stat-label">Happy Cooks</span>
+
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-value">50k+</h3>
+              <p class="stat-label">Happy Cooks</p>
             </div>
           </div>
         </div>
@@ -136,48 +144,73 @@ const getRecipeCount = (categoryId) => {
 }
 
 .stats-section {
-  background: white;
-  padding: 2rem 0;
-  margin-bottom: 3rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  margin-top: -2rem;
+  margin-bottom: 4rem;
+  position: relative;
+  z-index: 10;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 
-.stat-item {
+.stat-card {
+  background: white;
+  padding: .5rem .9rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 1.5rem;
-  padding: 1rem;
+  transition: all 0.3s ease;
 }
 
-.stat-item i {
-  font-size: 2rem;
-  color: #6C63FF;
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.1);
 }
 
-.stat-info {
+.stat-icon {
+  width: 64px;
+  height: 64px;
+  background: #f1f5f9;
+  border-radius: 12px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: #6366f1;
+  transition: all 0.3s ease;
 }
 
-.stat-number {
-  font-size: 2rem;
+.stat-card:hover .stat-icon {
+  background: #6366f1;
+  color: white;
+  transform: scale(1.1);
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 2.5rem;
   font-weight: 700;
   color: #1e293b;
-  line-height: 1;
+  line-height: 1.2;
+  margin: 0;
 }
 
 .stat-label {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #64748b;
-  margin-top: 0.2rem;
+  margin: 0;
+  margin-top: 0.3rem;
 }
 
 .categories-section {
@@ -277,6 +310,27 @@ const getRecipeCount = (categoryId) => {
   }
 }
 
+@media (max-width: 1024px) {
+  .stats-grid {
+    gap: 1.5rem;
+    padding: 0 2rem;
+  }
+
+  .stat-card {
+    padding: 1.5rem;
+  }
+
+  .stat-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 1.5rem;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+  }
+}
+
 @media (max-width: 768px) {
   .banner {
     padding: 4rem 0 2rem;
@@ -286,10 +340,33 @@ const getRecipeCount = (categoryId) => {
     font-size: 2.5rem;
   }
 
+  .stats-section {
+    margin-top: -2rem;
+    margin-bottom: 2rem;
+  }
+
   .stats-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
-    padding: 0 1rem;
+    padding: 0 1.5rem;
+  }
+
+  .stat-card {
+    padding: 1.2rem;
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.3rem;
+  }
+
+  .stat-value {
+    font-size: 1.8rem;
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
   }
 
   .categories-grid {

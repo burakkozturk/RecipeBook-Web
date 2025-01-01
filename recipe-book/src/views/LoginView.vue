@@ -137,6 +137,7 @@ const handleLogin = async () => {
 .auth-page {
   min-height: 100vh;
   display: flex;
+  margin-top: 4rem;
   align-items: center;
   justify-content: center;
   background: #f3f4f6;
