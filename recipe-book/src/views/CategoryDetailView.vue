@@ -22,17 +22,11 @@
 
         <div v-else class="recipes-grid">
           <div v-for="recipe in recipes" :key="recipe.id" class="recipe-card">
-            <div class="recipe-image" :style="{ backgroundImage: `url(${recipe.imageUrl})` }">
-              <div class="recipe-overlay">
-                <div class="recipe-meta">
-                  <span class="time">
-                    <i class="far fa-clock"></i>
-                    {{ recipe.cookTime + recipe.prepTime }} mins
-                  </span>
-                  <span class="difficulty">
-                    <i class="fas fa-signal"></i>
-                    {{ recipe.difficulty }}
-                  </span>
+            <div class="recipe-image-wrapper">
+              <div class="recipe-image" :style="{ backgroundImage: `url(${recipe.imageUrl})` }">
+                <div class="recipe-badges">
+                  <span class="badge difficulty">{{ recipe.difficulty }}</span>
+                  <span class="badge time">{{ recipe.cookTime + recipe.prepTime }}m</span>
                 </div>
               </div>
             </div>
@@ -42,16 +36,28 @@
               </div>
               <h3 class="recipe-title">{{ recipe.title }}</h3>
               <p class="recipe-description">{{ recipe.description }}</p>
-              <div class="recipe-footer">
-                <div class="recipe-info">
-                  <span class="prep-time">
-                    <i class="fas fa-hourglass-start"></i>
-                    Prep: {{ recipe.prepTime }}m
-                  </span>
-                  <span class="cook-time">
-                    <i class="fas fa-fire"></i>
-                    Cook: {{ recipe.cookTime }}m
-                  </span>
+            </div>
+            <div class="recipe-footer">
+              <div class="recipe-times">
+                <div class="time-item">
+                  <span class="time-label">PREP TIME</span>
+                  <span class="time-value">{{ recipe.prepTime }}m</span>
+                </div>
+                <div class="time-item">
+                  <span class="time-label">COOK TIME</span>
+                  <span class="time-value">{{ recipe.cookTime }}m</span>
+                </div>
+              </div>
+              <div class="recipe-actions">
+                <div class="recipe-stats">
+                  <button class="stat-button" @click.prevent="toggleLike(recipe)">
+                    <i class="fas fa-heart" :class="{ 'liked': recipe.isLiked }"></i>
+                    <span>{{ recipe.likes || 0 }}</span>
+                  </button>
+                  <div class="stat-item">
+                    <i class="fas fa-comment"></i>
+                    <span>{{ recipe.comments?.length || 0 }}</span>
+                  </div>
                 </div>
                 <router-link :to="`/recipe/${recipe.id}`" class="view-recipe">
                   View Recipe
@@ -93,6 +99,16 @@ const fetchRecipes = async () => {
   }
 }
 
+const toggleLike = async (recipe) => {
+  try {
+    const response = await axios.post(`http://localhost:9191/api/recipe/${recipe.id}/like`)
+    recipe.likes = response.data.likes
+    recipe.isLiked = !recipe.isLiked
+  } catch (err) {
+    console.error('Error liking recipe:', err)
+  }
+}
+
 onMounted(fetchRecipes)
 
 watch(() => route.params.id, fetchRecipes)
@@ -105,181 +121,379 @@ watch(() => route.params.id, fetchRecipes)
 }
 
 .category-header {
-  background-color: #6C63FF;
-  padding: 4rem 0;
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  padding: 5rem 0;
   text-align: center;
   color: white;
-}
-
-.category-header h1 {
-  font-size: 3rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-
-.category-header p {
-  font-size: 1.2rem;
-  opacity: 0.9;
-}
-
-.recipes-section {
-  padding: 4rem 0;
-}
-
-.loading, .error {
-  text-align: center;
-  padding: 3rem;
-  color: #64748b;
-}
-
-.loading i {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-.recipes-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 2rem;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-.recipe-card {
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s ease;
-}
-
-.recipe-card:hover {
-  transform: translateY(-5px);
-}
-
-.recipe-image {
-  height: 240px;
-  background-size: cover;
-  background-position: center;
   position: relative;
+  overflow: hidden;
 }
 
-.recipe-overlay {
+.category-header::before {
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
-  padding: 1rem;
+  background: url('@/assets/pattern.png') repeat;
+  opacity: 0.1;
+}
+
+.category-header h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.category-header p {
+  font-size: 1.3rem;
+  opacity: 0.9;
+}
+
+.recipes-section {
+  padding: 4rem 0;
+  margin-top: -4rem;
+}
+
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.recipe-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  height: auto;
+  display: flex;
+  flex-direction: column;
 }
 
-.recipe-meta {
-  display: flex;
-  gap: 1rem;
-  color: white;
-  font-size: 0.9rem;
+.recipe-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.1);
 }
 
-.recipe-meta span {
+.recipe-image-wrapper {
+  position: relative;
+  padding-top: 55%;
+  flex-shrink: 0;
+}
+
+.recipe-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.5s ease;
+}
+
+.recipe-card:hover .recipe-image {
+  transform: scale(1.05);
+}
+
+.recipe-badges {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  right: 1rem;
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(0, 0, 0, 0.5);
+  justify-content: space-between;
+  z-index: 2;
+}
+
+.badge {
+  background: rgba(255, 255, 255, 0.95);
+  color: #1a1a1a;
   padding: 0.5rem 1rem;
   border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .recipe-content {
   padding: 1.5rem;
+  flex: 1;
+}
+
+.recipe-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.like-button {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #6b7280;
+  transition: all 0.3s ease;
+}
+
+.like-button:hover {
+  color: #ef4444;
+  transform: scale(1.05);
+}
+
+.like-button i {
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.like-button i.liked {
+  color: #ef4444;
+  animation: likeAnimation 0.3s ease;
+}
+
+.like-count {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+@keyframes likeAnimation {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .recipe-tags {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 1rem;
   flex-wrap: wrap;
+  flex: 1;
 }
 
 .tag {
-  background: #f1f5f9;
-  color: #64748b;
-  padding: 0.25rem 0.75rem;
-  border-radius: 100px;
-  font-size: 0.85rem;
-}
-
-.recipe-title {
-  font-size: 1.4rem;
-  color: #1e293b;
-  margin-bottom: 0.8rem;
-  line-height: 1.3;
-}
-
-.recipe-description {
-  color: #64748b;
-  font-size: 0.95rem;
-  margin-bottom: 1.5rem;
-  line-height: 1.5;
-}
-
-.recipe-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 1rem;
-  border-top: 1px solid #e2e8f0;
-}
-
-.recipe-info {
-  display: flex;
-  gap: 1rem;
-  color: #64748b;
-  font-size: 0.9rem;
-}
-
-.recipe-info span {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.view-recipe {
-  background: #6C63FF;
-  color: white;
-  padding: 0.6rem 1.2rem;
-  border-radius: 50px;
-  text-decoration: none;
-  font-size: 0.9rem;
+  background: #f3f4f6;
+  color: #6366f1;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
   font-weight: 500;
   transition: all 0.3s ease;
 }
 
+.tag:hover {
+  background: #6366f1;
+  color: white;
+}
+
+.recipe-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: .3rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 0.5rem;
+  min-height: 1.5em;
+  height: auto;
+  max-height: 3em;
+}
+
+.recipe-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #4b5563;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 3em;
+  height: auto;
+  max-height: 4.8em;
+}
+
+.recipe-footer {
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+  margin-top: auto;
+}
+
+.recipe-times {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-bottom: 1.2rem;
+}
+
+.time-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+
+.time-label {
+  font-size: 0.7rem;
+  color: #6b7280;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.2rem;
+}
+
+.time-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.recipe-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.2rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.recipe-stats {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.stat-button, .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.stat-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.stat-button:hover {
+  color: #ef4444;
+  background: #f3f4f6;
+}
+
+.stat-button i.liked {
+  color: #ef4444;
+}
+
+.view-recipe {
+  background: #6366f1;
+  color: white;
+  padding: 0.7rem 4.4rem;
+  border-radius: 8px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
 .view-recipe:hover {
-  background: #5B52E5;
+  background: #4f46e5;
   transform: translateY(-2px);
 }
 
 @media (max-width: 768px) {
-  .category-header {
-    padding: 3rem 0;
-  }
-
-  .category-header h1 {
-    font-size: 2.5rem;
-  }
-
   .recipes-grid {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 1rem;
   }
 
   .recipe-card {
-    max-width: 500px;
-    margin: 0 auto;
+    height: 520px;
+  }
+
+  .recipe-image-wrapper {
+    padding-top: 50%;
+  }
+
+  .recipe-content {
+    padding: 1.25rem;
+    gap: 0.8rem;
+  }
+
+  .recipe-footer {
+    padding: 1.25rem;
+  }
+
+  .time-value {
+    font-size: 1rem;
+  }
+
+  .recipe-title {
+    font-size: 1.3rem;
+  }
+
+  .recipe-description {
+    font-size: 0.95rem;
+  }
+
+  .recipe-times {
+    gap: 2rem;
+  }
+
+  .like-button {
+    padding: 0.4rem;
+  }
+
+  .like-button i {
+    font-size: 1.1rem;
+  }
+
+  .like-count {
+    font-size: 0.85rem;
+  }
+
+  .recipe-actions {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .recipe-stats {
+    gap: 0.8rem;
+  }
+
+  .stat-button, .stat-item {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .view-recipe {
+    padding: 0.5rem 1rem;
+    min-width: 100px;
   }
 }
 </style> 
