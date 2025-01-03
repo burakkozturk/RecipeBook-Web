@@ -76,64 +76,146 @@
       </div>
 
       <!-- Recipes Section -->
-      <div class="recipes-section">
-        <h2>My Recipes</h2>
-        <div v-if="loadingRecipes" class="loading">
-          <i class="fas fa-spinner fa-spin"></i>
-          <p>Loading recipes...</p>
-        </div>
-        <div v-else-if="recipes.length === 0" class="no-recipes">
-          <p>No recipes added yet.</p>
-        </div>
-        <div v-else class="recipes-grid">
-          <div v-for="recipe in recipes" :key="recipe.id" class="recipe-card">
-            <div class="recipe-image-wrapper">
-              <div class="recipe-image" :style="{ backgroundImage: `url(${recipe.imageUrl})` }">
-                <div class="recipe-badges">
-                  <span class="badge difficulty">{{ recipe.difficulty }}</span>
-                  <span class="badge time">{{ recipe.cookTime + recipe.prepTime }}m</span>
-                </div>
-              </div>
+      <div class="recipes-container">
+        <div class="recipes-section">
+          <div class="tabs">
+            <button 
+              class="tab-btn" 
+              :class="{ active: activeTab === 'recipes' }"
+              @click="switchTab('recipes')"
+            >
+              <i class="fas fa-utensils"></i>
+              My Recipes
+            </button>
+            <button 
+              class="tab-btn" 
+              :class="{ active: activeTab === 'favorites' }"
+              @click="switchTab('favorites')"
+            >
+              <i class="fas fa-heart"></i>
+              My Favorites
+            </button>
+          </div>
+
+          <div v-if="activeTab === 'recipes'">
+            <div v-if="loadingRecipes" class="loading">
+              <i class="fas fa-spinner fa-spin"></i>
+              <p>Loading recipes...</p>
             </div>
-            <div class="recipe-content">
-              <div class="recipe-tags">
-                <span v-for="tag in recipe.tags" :key="tag" class="tag">{{ tag }}</span>
-              </div>
-              <h3 class="recipe-title">{{ recipe.title }}</h3>
-              <p class="recipe-description">{{ recipe.description }}</p>
+            <div v-else-if="recipes.length === 0" class="no-recipes">
+              <p>No recipes added yet.</p>
             </div>
-            <div class="recipe-footer">
-              <div class="recipe-times">
-                <div class="time-item">
-                  <span class="time-label">PREP TIME</span>
-                  <span class="time-value">{{ recipe.prepTime }}m</span>
-                </div>
-                <div class="time-item">
-                  <span class="time-label">COOK TIME</span>
-                  <span class="time-value">{{ recipe.cookTime }}m</span>
-                </div>
-              </div>
-              <div class="recipe-actions">
-                <div class="recipe-stats">
-                  <button class="stat-button" @click.prevent="toggleLike(recipe)">
-                    <i class="fas fa-heart" :class="{ 'liked': recipe.isLiked }"></i>
-                    <span>{{ recipe.likes || 0 }}</span>
-                  </button>
-                  <div class="stat-item">
-                    <i class="fas fa-comment"></i>
-                    <span>{{ recipe.comments?.length || 0 }}</span>
+            <div v-else class="recipes-grid">
+              <div v-for="recipe in recipes" :key="recipe.id" class="recipe-card">
+                <div class="recipe-image-wrapper">
+                  <div class="recipe-image" :style="{ backgroundImage: `url(${recipe.imageUrl})` }">
+                    <div class="recipe-badges">
+                      <span class="badge difficulty">{{ recipe.difficulty }}</span>
+                      <span class="badge time">{{ recipe.cookTime + recipe.prepTime }}m</span>
+                    </div>
                   </div>
                 </div>
-                <div class="action-buttons">
-                  <button class="action-btn edit" @click="editRecipe(recipe)" title="Edit Recipe">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button class="action-btn delete" @click="deleteRecipe(recipe)" title="Delete Recipe">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                  <router-link :to="`/recipe/${recipe.id}`" class="view-recipe">
-                    View Recipe
-                  </router-link>
+                <div class="recipe-content">
+                  <div class="recipe-tags">
+                    <span v-for="tag in recipe.tags" :key="tag" class="tag">{{ tag }}</span>
+                  </div>
+                  <h3 class="recipe-title">{{ recipe.title }}</h3>
+                  <p class="recipe-description">{{ recipe.description }}</p>
+                </div>
+                <div class="recipe-footer">
+                  <div class="recipe-times">
+                    <div class="time-item">
+                      <span class="time-label">PREP TIME</span>
+                      <span class="time-value">{{ recipe.prepTime }}m</span>
+                    </div>
+                    <div class="time-item">
+                      <span class="time-label">COOK TIME</span>
+                      <span class="time-value">{{ recipe.cookTime }}m</span>
+                    </div>
+                  </div>
+                  <div class="recipe-actions">
+                    <div class="recipe-stats">
+                      <button class="stat-button" @click.prevent="toggleLike(recipe)">
+                        <i class="fas fa-heart" :class="{ 'liked': recipe.isLiked }"></i>
+                        <span>{{ recipe.likes || 0 }}</span>
+                      </button>
+                      <div class="stat-item">
+                        <i class="fas fa-comment"></i>
+                        <span>{{ recipe.comments?.length || 0 }}</span>
+                      </div>
+                    </div>
+                    <div class="action-buttons">
+                      <template v-if="currentUserId === recipe.authorId">
+                        <button class="action-btn edit" @click="editRecipe(recipe)" title="Edit Recipe">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete" @click="deleteRecipe(recipe)" title="Delete Recipe">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </template>
+                      <router-link :to="`/recipe/${recipe.id}`" class="view-recipe">
+                        View Recipe
+                      </router-link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div v-else>
+            <div v-if="loadingFavorites" class="loading">
+              <i class="fas fa-spinner fa-spin"></i>
+              <p>Loading favorites...</p>
+            </div>
+            <div v-else-if="favoriteRecipes.length === 0" class="no-recipes">
+              <p>No favorite recipes yet.</p>
+            </div>
+            <div v-else class="recipes-grid">
+              <div v-for="recipe in favoriteRecipes" :key="recipe.id" class="recipe-card">
+                <div class="recipe-image-wrapper">
+                  <div class="recipe-image" :style="{ backgroundImage: `url(${recipe.imageUrl})` }">
+                    <div class="recipe-badges">
+                      <span class="badge difficulty">{{ recipe.difficulty }}</span>
+                      <span class="badge time">{{ recipe.cookTime + recipe.prepTime }}m</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="recipe-content">
+                  <div class="recipe-tags">
+                    <span v-for="tag in recipe.tags" :key="tag" class="tag">{{ tag }}</span>
+                  </div>
+                  <h3 class="recipe-title">{{ recipe.title }}</h3>
+                  <p class="recipe-description">{{ recipe.description }}</p>
+                </div>
+                <div class="recipe-footer">
+                  <div class="recipe-times">
+                    <div class="time-item">
+                      <span class="time-label">PREP TIME</span>
+                      <span class="time-value">{{ recipe.prepTime }}m</span>
+                    </div>
+                    <div class="time-item">
+                      <span class="time-label">COOK TIME</span>
+                      <span class="time-value">{{ recipe.cookTime }}m</span>
+                    </div>
+                  </div>
+                  <div class="recipe-actions">
+                    <div class="recipe-stats">
+                      <button class="stat-button" @click.prevent="toggleLike(recipe)">
+                        <i class="fas fa-heart" :class="{ 'liked': recipe.isLiked }"></i>
+                        <span>{{ recipe.likes || 0 }}</span>
+                      </button>
+                      <div class="stat-item">
+                        <i class="fas fa-comment"></i>
+                        <span>{{ recipe.comments?.length || 0 }}</span>
+                      </div>
+                    </div>
+                    <div class="action-buttons">
+                      <router-link :to="`/recipe/${recipe.id}`" class="view-recipe">
+                        View Recipe
+                      </router-link>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -153,6 +235,10 @@ const recipes = ref([])
 const loading = ref(true)
 const loadingRecipes = ref(true)
 const error = ref(null)
+const activeTab = ref('recipes')
+const favoriteRecipes = ref([])
+const loadingFavorites = ref(true)
+const currentUserId = ref(null)
 
 const fetchUserProfile = async () => {
   try {
@@ -160,6 +246,7 @@ const fetchUserProfile = async () => {
     error.value = null
     const response = await axios.get('http://localhost:9191/api/user/username/qwerty')
     user.value = response.data
+    currentUserId.value = response.data.id
   } catch (err) {
     error.value = 'Failed to load profile. Please try again later.'
     console.error('Error fetching profile:', err)
@@ -212,6 +299,33 @@ const deleteRecipe = async (recipe) => {
     } catch (err) {
       console.error('Error deleting recipe:', err)
     }
+  }
+}
+
+const switchTab = (tab) => {
+  activeTab.value = tab
+  if (tab === 'favorites' && favoriteRecipes.value.length === 0) {
+    fetchFavorites()
+  }
+}
+
+const fetchFavorites = async () => {
+  try {
+    loadingFavorites.value = true
+    const favResponse = await axios.get('http://localhost:9191/api/favourites/5')
+    const favoriteIds = favResponse.data.map(fav => fav.recipeId)
+    
+    // Her bir favori tarif için detay bilgilerini çek
+    const recipePromises = favoriteIds.map(id => 
+      axios.get(`http://localhost:9191/api/recipe/${id}`)
+    )
+    
+    const responses = await Promise.all(recipePromises)
+    favoriteRecipes.value = responses.map(res => res.data)
+  } catch (err) {
+    console.error('Error fetching favorites:', err)
+  } finally {
+    loadingFavorites.value = false
   }
 }
 
@@ -488,28 +602,26 @@ onMounted(() => {
 }
 
 /* Recipe section styles */
-.recipes-section {
+.recipes-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
   margin-top: 3rem;
+  margin-bottom: 3rem;
 }
 
-.recipes-section h2 {
-  font-size: 2.2rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 2.5rem;
-  text-align: center;
-  letter-spacing: -0.03em;
+.recipes-section {
+  padding: 2rem 0;
 }
 
 .recipes-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 2rem;
-  padding: 2rem;
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 1rem 0;
 }
 
 .recipe-card {
@@ -726,10 +838,18 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  .recipes-container {
+    padding: 0 1rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .recipes-section {
+    padding: 1.5rem 0;
+  }
+
   .recipes-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    padding: 1rem;
+    padding: 0.5rem 0;
   }
 
   .recipe-image-wrapper {
@@ -930,6 +1050,68 @@ onMounted(() => {
   .profile-btn {
     width: 100%;
     justify-content: center;
+  }
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 0.5rem;
+  background: #f8fafc;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-btn i {
+  font-size: 1.1rem;
+  transition: transform 0.3s ease;
+}
+
+.tab-btn:hover {
+  color: #4f46e5;
+  background: #f1f5f9;
+}
+
+.tab-btn:hover i {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.tab-btn.active {
+  background: #4f46e5;
+  color: white;
+}
+
+.tab-btn.active i {
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .tabs {
+    flex-direction: row;
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .tab-btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
   }
 }
 </style> 
