@@ -21,6 +21,11 @@
           </router-link>
         </div>
       </div>
+      <div class="explore-all-wrapper">
+        <router-link to="/categories" class="explore-all-btn">
+          Explore All Categories
+        </router-link>
+      </div>
     </div>
   </section>
 </template>
@@ -238,6 +243,36 @@ const categories = [
 
   .category-card {
     height: 250px;
+  }
+}
+
+.explore-all-wrapper {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.explore-all-btn {
+  display: inline-block;
+  padding: 1rem 2rem;
+  background-color: #6C63FF;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.explore-all-btn:hover {
+  background-color: #6C63FF;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 100, 47, 0.2);
+}
+
+@media (max-width: 768px) {
+  .explore-all-btn {
+    padding: 0.875rem 1.75rem;
+    font-size: 1rem;
   }
 }
 </style> 
