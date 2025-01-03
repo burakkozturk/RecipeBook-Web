@@ -1,172 +1,933 @@
-<script setup>
-import { onMounted } from 'vue'
-import { useAuthStore } from '@/stores/auth'
-import { useRouter } from 'vue-router'
-
-const authStore = useAuthStore()
-const router = useRouter()
-
-onMounted(() => {
-  if (!authStore.isAuthenticated()) {
-    router.push('/login')
-  }
-})
-</script>
-
 <template>
   <div class="profile-page">
-    <div class="container py-5">
-      <!-- Loading State -->
-      <div v-if="authStore.loading" class="text-center py-5">
-        <i class="fas fa-spinner fa-spin fa-2x"></i>
-        <p class="mt-3">Loading profile...</p>
-      </div>
+    <div v-if="loading" class="loading">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Loading profile...</p>
+    </div>
 
-      <!-- Error State -->
-      <div v-else-if="authStore.error" class="alert alert-danger">
-        {{ authStore.error }}
-      </div>
+    <div v-else-if="error" class="error">
+      <p>{{ error }}</p>
+    </div>
 
-      <!-- Profile Content -->
-      <div v-else-if="authStore.user" class="profile-content">
-        <div class="profile-card">
-          <div class="profile-header">
-            <div class="profile-avatar">
-              <i class="fas fa-user-circle"></i>
+    <div v-else class="profile-container">
+      <div class="profile-header">
+        <div class="profile-info">
+          <div class="profile-photo-section">
+            <div class="profile-photo">
+              <img :src="user.profilePhoto" :alt="user.name">
+              <div v-if="!user.verify" class="verify-badge" title="Not Verified">
+                <i class="fas fa-times-circle"></i>
+              </div>
+              <div v-else class="verify-badge verified" title="Verified">
+                <i class="fas fa-check-circle"></i>
+              </div>
             </div>
-            <h2 class="username">{{ authStore.user.username }}</h2>
-            
-            <div class="profile-actions mt-4">
-              <button class="btn btn-edit">
-                <i class="fas fa-edit"></i>
-                Edit Profile
+          </div>
+          <div class="profile-details">
+            <div class="profile-header-content">
+              <div class="name-section">
+                <h1>{{ user.name }}</h1>
+                <p class="username">@{{ user.username }}</p>
+              </div>
+            </div>
+            <div class="profile-stats">
+              <div class="stat-item">
+                <span class="stat-value">{{ user.followersCount }}</span>
+                <span class="stat-label">Followers</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-item">
+                <span class="stat-value">{{ user.followingCount }}</span>
+                <span class="stat-label">Following</span>
+              </div>
+            </div>
+            <div class="profile-info-items">
+              <div class="info-item" v-if="user.dateOfBirth">
+                <i class="fas fa-birthday-cake"></i>
+                <span>{{ formatDate(user.dateOfBirth) }}</span>
+              </div>
+              <div class="info-item" v-if="user.createdAt">
+                <i class="fas fa-calendar"></i>
+                <span>Joined {{ formatDate(user.createdAt) }}</span>
+              </div>
+            </div>
+            <div class="biography" v-if="user.biography">
+              <p>{{ user.biography }}</p>
+            </div>
+            <div class="biography" v-else>
+              <p class="no-bio">No biography added yet.</p>
+            </div>
+            <div class="action-group">
+              <button class="profile-btn settings" title="Settings">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
               </button>
-              <button class="btn btn-recipes">
-                <i class="fas fa-utensils"></i>
-                My Recipes
+              <button class="profile-btn new-recipe" title="Create New Recipe">
+                <i class="fas fa-plus"></i>
+                <span>New Recipe</span>
+              </button>
+              <button v-if="user.role === 'ADMIN'" class="profile-btn admin" title="Admin Panel">
+                <i class="fas fa-shield-alt"></i>
+                <span>Admin Panel</span>
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- No Data State -->
-      <div v-else class="text-center py-5">
-        <p>No profile data available</p>
+      <!-- Recipes Section -->
+      <div class="recipes-section">
+        <h2>My Recipes</h2>
+        <div v-if="loadingRecipes" class="loading">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Loading recipes...</p>
+        </div>
+        <div v-else-if="recipes.length === 0" class="no-recipes">
+          <p>No recipes added yet.</p>
+        </div>
+        <div v-else class="recipes-grid">
+          <div v-for="recipe in recipes" :key="recipe.id" class="recipe-card">
+            <div class="recipe-image-wrapper">
+              <div class="recipe-image" :style="{ backgroundImage: `url(${recipe.imageUrl})` }">
+                <div class="recipe-badges">
+                  <span class="badge difficulty">{{ recipe.difficulty }}</span>
+                  <span class="badge time">{{ recipe.cookTime + recipe.prepTime }}m</span>
+                </div>
+              </div>
+            </div>
+            <div class="recipe-content">
+              <div class="recipe-tags">
+                <span v-for="tag in recipe.tags" :key="tag" class="tag">{{ tag }}</span>
+              </div>
+              <h3 class="recipe-title">{{ recipe.title }}</h3>
+              <p class="recipe-description">{{ recipe.description }}</p>
+            </div>
+            <div class="recipe-footer">
+              <div class="recipe-times">
+                <div class="time-item">
+                  <span class="time-label">PREP TIME</span>
+                  <span class="time-value">{{ recipe.prepTime }}m</span>
+                </div>
+                <div class="time-item">
+                  <span class="time-label">COOK TIME</span>
+                  <span class="time-value">{{ recipe.cookTime }}m</span>
+                </div>
+              </div>
+              <div class="recipe-actions">
+                <div class="recipe-stats">
+                  <button class="stat-button" @click.prevent="toggleLike(recipe)">
+                    <i class="fas fa-heart" :class="{ 'liked': recipe.isLiked }"></i>
+                    <span>{{ recipe.likes || 0 }}</span>
+                  </button>
+                  <div class="stat-item">
+                    <i class="fas fa-comment"></i>
+                    <span>{{ recipe.comments?.length || 0 }}</span>
+                  </div>
+                </div>
+                <div class="action-buttons">
+                  <button class="action-btn edit" @click="editRecipe(recipe)" title="Edit Recipe">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="action-btn delete" @click="deleteRecipe(recipe)" title="Delete Recipe">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                  <router-link :to="`/recipe/${recipe.id}`" class="view-recipe">
+                    View Recipe
+                  </router-link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
-<style scoped>
-.profile-page {
-  background-color: #f3f4f6;
-  min-height: 100vh;
-  padding-top: 5rem;
+<script setup>
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+
+const user = ref(null)
+const recipes = ref([])
+const loading = ref(true)
+const loadingRecipes = ref(true)
+const error = ref(null)
+
+const fetchUserProfile = async () => {
+  try {
+    loading.value = true
+    error.value = null
+    const response = await axios.get('http://localhost:9191/api/user/username/qwerty')
+    user.value = response.data
+  } catch (err) {
+    error.value = 'Failed to load profile. Please try again later.'
+    console.error('Error fetching profile:', err)
+  } finally {
+    loading.value = false
+  }
 }
 
-.profile-card {
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  max-width: 600px;
-  margin: 0 auto;
+const fetchUserRecipes = async () => {
+  try {
+    loadingRecipes.value = true
+    const response = await axios.get('http://localhost:9191/api/recipe/user/qwerty')
+    recipes.value = response.data
+  } catch (err) {
+    console.error('Error fetching recipes:', err)
+  } finally {
+    loadingRecipes.value = false
+  }
+}
+
+const toggleLike = async (recipe) => {
+  try {
+    const response = await axios.post(`http://localhost:9191/api/recipe/${recipe.id}/like`)
+    recipe.likes = response.data.likes
+    recipe.isLiked = !recipe.isLiked
+  } catch (err) {
+    console.error('Error liking recipe:', err)
+  }
+}
+
+const formatDate = (date) => {
+  if (!date) return ''
+  return new Date(date).toLocaleDateString('tr-TR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+const editRecipe = (recipe) => {
+  // TODO: Implement edit functionality
+  console.log('Edit recipe:', recipe.id)
+}
+
+const deleteRecipe = async (recipe) => {
+  if (confirm('Are you sure you want to delete this recipe?')) {
+    try {
+      await axios.delete(`http://localhost:9191/api/recipe/${recipe.id}`)
+      recipes.value = recipes.value.filter(r => r.id !== recipe.id)
+    } catch (err) {
+      console.error('Error deleting recipe:', err)
+    }
+  }
+}
+
+onMounted(() => {
+  fetchUserProfile()
+  fetchUserRecipes()
+})
+</script>
+
+<style scoped>
+.profile-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 2rem 1rem;
 }
 
 .profile-header {
-  text-align: center;
-}
-
-.profile-avatar {
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #6C63FF;
-  border-radius: 50%;
-  color: white;
-}
-
-.profile-avatar i {
-  font-size: 4rem;
-}
-
-.username {
-  font-size: 1.8rem;
-  color: #2d3748;
-  margin-bottom: 1rem;
+  margin-top: 5rem;
+  margin-left: 12rem;
+  margin-right: 12rem;
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  margin-bottom: 2rem;
+  padding: 2rem;
 }
 
 .profile-info {
-  margin-top: 2rem;
+  display: flex;
+  gap: 3rem;
+  align-items: flex-start;
+}
+
+.profile-details {
+  margin-left: 3rem;
+  flex: 1;
+}
+
+.profile-header-content {
+  margin-bottom: 1.5rem;
+}
+
+.name-section h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.3rem;
+}
+
+.username {
+  font-size: 1.1rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.profile-stats {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin: 1.5rem 0;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.2rem;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.profile-info-items {
+  margin: 1.5rem 0;
 }
 
 .info-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: 0.8rem;
-  color: #4a5568;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
-.info-item i {
-  color: #6C63FF;
+.biography {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 12px;
 }
 
-.profile-actions {
+.action-group {
+  margin-top: 2rem;
   display: flex;
   gap: 1rem;
-  justify-content: center;
 }
 
-.btn {
-  padding: 0.8rem 1.5rem;
+@media (max-width: 768px) {
+  .profile-info {
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .profile-details {
+    margin-left: 0;
+    width: 100%;
+    text-align: center;
+  }
+
+  .profile-stats {
+    justify-content: center;
+  }
+
+  .info-item {
+    justify-content: center;
+  }
+
+  .action-group {
+    justify-content: center;
+  }
+}
+
+.profile-photo {
+  width: 300px;
+  height: 300px;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-photo:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+}
+
+.profile-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-photo:hover img {
+  transform: scale(1.08);
+}
+
+.verify-badge {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.verify-badge:hover {
+  transform: scale(1.15) rotate(5deg);
+}
+
+.verify-badge i {
+  font-size: 18px;
+}
+
+.profile-btn {
+  padding: 0.7rem 1.2rem;
   border-radius: 12px;
-  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.profile-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.profile-btn:hover::before {
+  opacity: 1;
+}
+
+.profile-btn i {
+  font-size: 1.1rem;
+  transition: transform 0.3s ease;
+}
+
+.profile-btn:hover i {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.profile-btn span {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.profile-btn.settings {
+  background: #f8fafc;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02),
+              inset 0 2px 4px rgba(255, 255, 255, 0.8);
+}
+
+.profile-btn.settings:hover {
+  background: #f1f5f9;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05),
+              inset 0 2px 4px rgba(255, 255, 255, 0.8);
+  border-color: #d1d5db;
+}
+
+.profile-btn.new-recipe {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.2);
+}
+
+.profile-btn.new-recipe:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(79, 70, 229, 0.3);
+  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+}
+
+.profile-btn.admin {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.2);
+}
+
+.profile-btn.admin:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(220, 38, 38, 0.3);
+  background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+}
+
+@media (max-width: 768px) {
+  .action-group {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+  }
+
+  .profile-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Recipe section styles */
+.recipes-section {
+  margin-top: 3rem;
+}
+
+.recipes-section h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 2.5rem;
+  text-align: center;
+  letter-spacing: -0.03em;
+}
+
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.recipe-card {
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  overflow: hidden;
+}
+
+.recipe-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+  border-color: rgba(99, 102, 241, 0.1);
+}
+
+.recipe-image-wrapper {
+  position: relative;
+  padding-top: 55%;
+  flex-shrink: 0;
+}
+
+.recipe-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.recipe-card:hover .recipe-image {
+  transform: scale(1.03);
+}
+
+.recipe-badges {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  right: 1rem;
+  display: flex;
+  justify-content: space-between;
+  z-index: 2;
+}
+
+.badge {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  color: #1f2937;
+  padding: 0.6rem 1.2rem;
+  border-radius: 100px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+  letter-spacing: -0.01em;
+  transition: all 0.3s ease;
+}
+
+.recipe-card:hover .badge {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+.recipe-content {
+  padding: 1.5rem;
+  flex: 1;
+}
+
+.recipe-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.tag {
+  background: #f3f4f6;
+  color: #6366f1;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
   font-weight: 500;
   transition: all 0.3s ease;
 }
 
-.btn-edit {
-  background-color: #6C63FF;
+.tag:hover {
+  background: #e0e7ff;
+  color: #4f46e5;
+  transform: translateY(-1px);
+}
+
+.recipe-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: .3rem;
+  color: #1f2937;
+}
+
+.recipe-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #4b5563;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 3em;
+  height: auto;
+  max-height: 4.8em;
+}
+
+.recipe-footer {
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+  margin-top: auto;
+}
+
+.recipe-times {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-bottom: 1.2rem;
+}
+
+.time-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+
+.time-label {
+  font-size: 0.7rem;
+  color: #6b7280;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.2rem;
+}
+
+.time-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.recipe-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.2rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.recipe-stats {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.stat-button, .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.stat-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.stat-button:hover {
+  color: #ef4444;
+  background: #f3f4f6;
+}
+
+.stat-button i.liked {
+  color: #ef4444;
+}
+
+.view-recipe {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
   color: white;
+  padding: 0.8rem 1.6rem;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.btn-edit:hover {
-  background-color: #5b52e5;
+.view-recipe:hover {
+  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.25);
 }
 
-.btn-recipes {
-  background-color: #FF6B6B;
-  color: white;
-}
-
-.btn-recipes:hover {
-  background-color: #ff5252;
-}
-
-.alert {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-@media (max-width: 640px) {
-  .profile-card {
-    margin: 1rem;
+@media (max-width: 768px) {
+  .recipes-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 1rem;
   }
-  
-  .profile-actions {
+
+  .recipe-image-wrapper {
+    padding-top: 50%;
+  }
+
+  .recipe-content {
+    padding: 1.25rem;
+  }
+
+  .recipe-footer {
+    padding: 1.25rem;
+  }
+
+  .time-value {
+    font-size: 1rem;
+  }
+
+  .recipe-title {
+    font-size: 1.3rem;
+  }
+
+  .recipe-description {
+    font-size: 0.95rem;
+  }
+
+  .recipe-times {
+    gap: 2rem;
+  }
+
+  .recipe-stats {
+    gap: 0.8rem;
+  }
+
+  .stat-button, .stat-item {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .view-recipe {
+    padding: 0.5rem 1rem;
+    min-width: 100px;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: #f3f4f6;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.action-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+
+.action-btn.edit:hover {
+  background: #3b82f6;
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.action-btn.delete:hover {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.action-btn i {
+  font-size: 1rem;
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem 0 2.5rem;
+  position: relative;
+}
+
+.action-group {
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem;
+  background: #f8fafc;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02),
+              0 2px 4px rgba(0, 0, 0, 0.02),
+              inset 0 2px 4px rgba(255, 255, 255, 0.8);
+}
+
+.profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1.5rem;
+  border-radius: 16px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.profile-btn:hover::before {
+  opacity: 1;
+}
+
+.profile-btn i {
+  font-size: 1.1rem;
+  transition: transform 0.3s ease;
+}
+
+.profile-btn:hover i {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.profile-btn span {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.profile-btn.settings {
+  background: #f8fafc;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02),
+              inset 0 2px 4px rgba(255, 255, 255, 0.8);
+}
+
+.profile-btn.settings:hover {
+  background: #f1f5f9;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05),
+              inset 0 2px 4px rgba(255, 255, 255, 0.8);
+  border-color: #d1d5db;
+}
+
+.profile-btn.new-recipe {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.2);
+}
+
+.profile-btn.new-recipe:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(79, 70, 229, 0.3);
+  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+}
+
+.profile-btn.admin {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.2);
+}
+
+.profile-btn.admin:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(220, 38, 38, 0.3);
+  background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+}
+
+@media (max-width: 768px) {
+  .action-group {
     flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
   }
-  
-  .btn {
+
+  .profile-btn {
     width: 100%;
     justify-content: center;
   }
