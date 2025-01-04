@@ -1,18 +1,21 @@
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import Navbar from './components/Navbar.vue'
 import Footer from './components/Footer.vue'
 import BackToTop from './components/BackToTop.vue'
+
+const route = useRoute()
+const isAdminRoute = computed(() => route.path.startsWith('/admin'))
 </script>
 
 <template>
-  <div class="app">
-    <Navbar />
-    <main class="main-content">
-      <router-view />
-    </main>
-    <Footer />
-    <BackToTop />
-  </div>
+  <Navbar v-if="!isAdminRoute" />
+  <main class="main-content">
+    <router-view />
+  </main>
+  <Footer />
+  <BackToTop />
 </template>
 
 <style>

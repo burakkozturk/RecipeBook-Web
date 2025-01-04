@@ -58,18 +58,22 @@
               <p class="no-bio">No biography added yet.</p>
             </div>
             <div class="action-group">
-              <button class="profile-btn settings" title="Settings">
+              <router-link to="/settings" class="btn btn-settings">
                 <i class="fas fa-cog"></i>
-                <span>Settings</span>
-              </button>
-              <button class="profile-btn new-recipe" title="Create New Recipe">
+                Settings
+              </router-link>
+              <router-link to="/recipe/new" class="btn btn-new-recipe">
                 <i class="fas fa-plus"></i>
-                <span>New Recipe</span>
-              </button>
-              <button v-if="user.role === 'ADMIN'" class="profile-btn admin" title="Admin Panel">
-                <i class="fas fa-shield-alt"></i>
-                <span>Admin Panel</span>
-              </button>
+                New Recipe
+              </router-link>
+              <router-link 
+                v-if="user?.authorities?.includes('ROLE_ADMIN')" 
+                to="/admin" 
+                class="btn btn-admin"
+              >
+                <i class="fas fa-user-shield"></i>
+                Admin Dashboard
+              </router-link>
             </div>
           </div>
         </div>
@@ -229,7 +233,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import { useAuthStore } from '../stores/auth'
 
+const auth = useAuthStore()
 const user = ref(null)
 const recipes = ref([])
 const loading = ref(true)
@@ -244,7 +250,7 @@ const fetchUserProfile = async () => {
   try {
     loading.value = true
     error.value = null
-    const response = await axios.get('http://localhost:9191/api/user/username/qwerty')
+    const response = await axios.get(`http://localhost:9191/api/user/username/${auth.user.username}`)
     user.value = response.data
     currentUserId.value = response.data.id
   } catch (err) {
@@ -258,7 +264,7 @@ const fetchUserProfile = async () => {
 const fetchUserRecipes = async () => {
   try {
     loadingRecipes.value = true
-    const response = await axios.get('http://localhost:9191/api/recipe/user/qwerty')
+    const response = await axios.get(`http://localhost:9191/api/recipe/user/${auth.user.username}`)
     recipes.value = response.data
   } catch (err) {
     console.error('Error fetching recipes:', err)
@@ -312,10 +318,9 @@ const switchTab = (tab) => {
 const fetchFavorites = async () => {
   try {
     loadingFavorites.value = true
-    const favResponse = await axios.get('http://localhost:9191/api/favourites/5')
+    const favResponse = await axios.get(`http://localhost:9191/api/favourites/${currentUserId.value}`)
     const favoriteIds = favResponse.data.map(fav => fav.recipeId)
     
-    // Her bir favori tarif için detay bilgilerini çek
     const recipePromises = favoriteIds.map(id => 
       axios.get(`http://localhost:9191/api/recipe/${id}`)
     )
@@ -505,97 +510,65 @@ onMounted(() => {
   font-size: 18px;
 }
 
-.profile-btn {
-  padding: 0.7rem 1.2rem;
-  border-radius: 12px;
-  font-size: 0.9rem;
+.btn {
+  padding: 0.8rem 1.5rem;
+  border-radius: 10px;
   font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  transition: all 0.3s ease;
 }
 
-.profile-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.profile-btn:hover::before {
-  opacity: 1;
-}
-
-.profile-btn i {
+.btn i {
   font-size: 1.1rem;
-  transition: transform 0.3s ease;
 }
 
-.profile-btn:hover i {
-  transform: scale(1.1) rotate(5deg);
-}
-
-.profile-btn span {
-  font-weight: 500;
-  letter-spacing: 0.01em;
-}
-
-.profile-btn.settings {
-  background: #f8fafc;
+.btn-settings {
+  background: #f3f4f6;
   color: #4b5563;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02),
-              inset 0 2px 4px rgba(255, 255, 255, 0.8);
 }
 
-.profile-btn.settings:hover {
-  background: #f1f5f9;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05),
-              inset 0 2px 4px rgba(255, 255, 255, 0.8);
-  border-color: #d1d5db;
+.btn-settings:hover {
+  background: #e5e7eb;
+  color: #1f2937;
 }
 
-.profile-btn.new-recipe {
+.btn-new-recipe {
+  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+  color: white;
+}
+
+.btn-new-recipe:hover {
   background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-  color: white;
-  border: none;
-  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.2);
-}
-
-.profile-btn.new-recipe:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(79, 70, 229, 0.3);
-  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
-.profile-btn.admin {
+.btn-admin {
+  background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+  color: white;
+}
+
+.btn-admin:hover {
   background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-  color: white;
-  border: none;
-  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
-.profile-btn.admin:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(220, 38, 38, 0.3);
-  background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+.action-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
 }
 
 @media (max-width: 768px) {
   .action-group {
     flex-direction: column;
-    width: 100%;
-    gap: 0.75rem;
   }
-
-  .profile-btn {
+  
+  .btn {
     width: 100%;
     justify-content: center;
   }

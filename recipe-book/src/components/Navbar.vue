@@ -69,9 +69,9 @@ const handleLogout = () => {
 
           <!-- Giriş yapılmışsa -->
           <template v-else>
-            <router-link to="/profile" class="btn btn-profile">
+            <router-link to="/profile" class="btn btn-profile" :title="authStore.user.username">
               <i class="fas fa-user"></i>
-              Profile
+              <span class="username-tooltip">{{ authStore.user.username }}</span>
             </router-link>
             <button @click="handleLogout" class="btn btn-logout">
               <i class="fas fa-sign-out-alt"></i>
@@ -206,12 +206,48 @@ const handleLogout = () => {
   border: 1.5px solid rgba(255, 255, 255, 0.8);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  position: relative;
+  padding: 0.6rem;
+  width: 42px;
+  height: 42px;
 }
 
 .btn-profile:hover {
   background-color: rgba(255, 255, 255, 0.2);
   color: #fff;
+}
+
+.username-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  bottom: -40px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  transform: translateY(-5px);
+}
+
+.username-tooltip::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 5px 5px 5px;
+  border-style: solid;
+  border-color: transparent transparent rgba(0, 0, 0, 0.8) transparent;
+}
+
+.btn-profile:hover .username-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 .btn-logout {
