@@ -16,26 +16,26 @@
       </div>
       
       <nav class="sidebar-nav">
-        <a href="#dashboard" class="nav-item active">
+        <router-link to="/admin" class="nav-item" exact>
           <i class="fas fa-chart-pie"></i>
           <span>Dashboard</span>
-        </a>
-        <a href="#recipes" class="nav-item">
+        </router-link>
+        <router-link to="/admin/recipes" class="nav-item">
           <i class="fas fa-utensils"></i>
           <span>Recipes</span>
-        </a>
-        <a href="#categories" class="nav-item">
+        </router-link>
+        <router-link to="/admin/categories" class="nav-item">
           <i class="fas fa-tags"></i>
           <span>Categories</span>
-        </a>
-        <a href="#users" class="nav-item">
+        </router-link>
+        <router-link to="/admin/users" class="nav-item">
           <i class="fas fa-users"></i>
           <span>Users</span>
-        </a>
-        <a href="#comments" class="nav-item">
+        </router-link>
+        <router-link to="/admin/comments" class="nav-item">
           <i class="fas fa-comments"></i>
           <span>Comments</span>
-        </a>
+        </router-link>
       </nav>
 
       <div class="sidebar-footer">
@@ -54,100 +54,10 @@
       <header class="admin-header">
         <div class="header-left">
           <h1>Dashboard</h1>
-          <p>Welcome back, John Doe</p>
-        </div>
-        
-        <div class="header-actions">
-          <div class="search-box">
-            <i class="fas fa-search"></i>
-            <input type="text" placeholder="Search...">
-          </div>
-          
-          <button class="notification-btn">
-            <i class="fas fa-bell"></i>
-            <span class="badge">3</span>
-          </button>
         </div>
       </header>
 
-      <div class="admin-content">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon recipes">
-              <i class="fas fa-utensils"></i>
-            </div>
-            <div class="stat-info">
-              <p>Total Recipes</p>
-              <h3>1,234</h3>
-              <span class="trend up">
-                <i class="fas fa-arrow-up"></i> 12.5%
-              </span>
-            </div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-icon users">
-              <i class="fas fa-users"></i>
-            </div>
-            <div class="stat-info">
-              <p>Total Users</p>
-              <h3>5,678</h3>
-              <span class="trend up">
-                <i class="fas fa-arrow-up"></i> 8.2%
-              </span>
-            </div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-icon reviews">
-              <i class="fas fa-star"></i>
-            </div>
-            <div class="stat-info">
-              <p>Total Reviews</p>
-              <h3>9,012</h3>
-              <span class="trend up">
-                <i class="fas fa-arrow-up"></i> 5.7%
-              </span>
-            </div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-icon views">
-              <i class="fas fa-eye"></i>
-            </div>
-            <div class="stat-info">
-              <p>Total Views</p>
-              <h3>45.6K</h3>
-              <span class="trend down">
-                <i class="fas fa-arrow-down"></i> 3.2%
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div class="dashboard-grid">
-          <div class="chart-card">
-            <h3>Activity Overview</h3>
-            <!-- Chart gelecek -->
-          </div>
-          
-          <div class="recent-card">
-            <h3>Recent Activities</h3>
-            <div class="activity-list">
-              <div class="activity-item">
-                <div class="activity-icon">
-                  <i class="fas fa-plus-circle"></i>
-                </div>
-                <div class="activity-info">
-                  <p>New recipe added: <strong>Turkish Kebab</strong></p>
-                  <span>2 hours ago</span>
-                </div>
-              </div>
-              <!-- Diğer aktiviteler -->
-            </div>
-          </div>
-        </div>
-      </div>
+      <router-view></router-view>
     </main>
   </div>
 </template>

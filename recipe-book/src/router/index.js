@@ -1,7 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import AdminLayout from '../views/admin/AdminLayout.vue'
+import LoginView from '../views/LoginView.vue'
+import RegisterView from '../views/RegisterView.vue'
+import ProfileView from '../views/ProfileView.vue'
+import AdminView from '../views/AdminView.vue'
+import Categories from '../views/admin/Categories.vue'
 import Dashboard from '../views/admin/Dashboard.vue'
+import AdminRecipes from '../views/admin/Recipes.vue'
+import AdminUsers from '../views/admin/Users.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -12,49 +18,46 @@ const router = createRouter({
       component: HomeView
     },
     {
-      path: '/tarifler',
-      name: 'recipes',
-      component: () => import('../views/RecipesView.vue')
-    },
-    {
-      path: '/tarif-ekle',
-      name: 'add-recipe',
-      component: () => import('../views/AddRecipeView.vue')
-    },
-    {
-      path: '/profile',
-      name: 'profile',
-      component: () => import('../views/ProfileView.vue')
-    },
-    {
-      path: '/admin',
-      name: 'admin',
-      component: () => import('../views/AdminView.vue')
-    },
-    {
       path: '/login',
       name: 'login',
-      component: () => import('../views/LoginView.vue')
+      component: LoginView
     },
     {
       path: '/register',
       name: 'register',
-      component: () => import('../views/RegisterView.vue')
+      component: RegisterView
     },
     {
-      path: '/categories',
-      name: 'categories',
-      component: () => import('../views/CategoriesView.vue')
+      path: '/profile',
+      name: 'profile',
+      component: ProfileView
     },
     {
-      path: '/category/:id',
-      name: 'category-detail',
-      component: () => import('../views/CategoryDetailView.vue')
-    },
-    {
-      path: '/recipe/:id',
-      name: 'recipe-detail',
-      component: () => import('../views/RecipeDetailView.vue')
+      path: '/admin',
+      component: () => import('../views/admin/AdminLayout.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
+      children: [
+        {
+          path: '',
+          name: 'admin-dashboard',
+          component: () => import('../views/admin/Dashboard.vue')
+        },
+        {
+          path: 'users',
+          name: 'admin-users',
+          component: () => import('../views/admin/Users.vue')
+        },
+        {
+          path: 'recipes',
+          name: 'admin-recipes',
+          component: () => import('../views/admin/Recipes.vue')
+        },
+        {
+          path: 'categories',
+          name: 'admin-categories',
+          component: () => import('../views/admin/Categories.vue')
+        }
+      ]
     }
   ]
 })
