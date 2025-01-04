@@ -228,8 +228,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useAuthStore } from '../stores/auth'
 import axios from 'axios'
 
+const auth = useAuthStore()
 const user = ref(null)
 const recipes = ref([])
 const loading = ref(true)
@@ -244,7 +246,7 @@ const fetchUserProfile = async () => {
   try {
     loading.value = true
     error.value = null
-    const response = await axios.get('http://localhost:9191/api/user/username/qwerty')
+    const response = await axios.get(`http://localhost:9191/api/user/username/${auth.user.username}`)
     user.value = response.data
     currentUserId.value = response.data.id
   } catch (err) {
@@ -258,7 +260,7 @@ const fetchUserProfile = async () => {
 const fetchUserRecipes = async () => {
   try {
     loadingRecipes.value = true
-    const response = await axios.get('http://localhost:9191/api/recipe/user/qwerty')
+    const response = await axios.get(`http://localhost:9191/api/recipe/user/${auth.user.username}`)
     recipes.value = response.data
   } catch (err) {
     console.error('Error fetching recipes:', err)
@@ -312,10 +314,9 @@ const switchTab = (tab) => {
 const fetchFavorites = async () => {
   try {
     loadingFavorites.value = true
-    const favResponse = await axios.get('http://localhost:9191/api/favourites/5')
+    const favResponse = await axios.get(`http://localhost:9191/api/favourites/${currentUserId.value}`)
     const favoriteIds = favResponse.data.map(fav => fav.recipeId)
     
-    // Her bir favori tarif için detay bilgilerini çek
     const recipePromises = favoriteIds.map(id => 
       axios.get(`http://localhost:9191/api/recipe/${id}`)
     )
