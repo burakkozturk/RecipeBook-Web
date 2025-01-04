@@ -232,6 +232,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useAuthStore } from '../stores/auth'
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 
