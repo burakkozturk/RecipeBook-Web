@@ -2,7 +2,7 @@
   <div class="categories-page">
     <div class="page-header">
       <h1>Categories</h1>
-      <button class="add-category-btn">
+      <button class="add-category-btn" @click="showAddModal = true">
         <i class="fas fa-plus"></i>
         Add Category
       </button>
@@ -21,21 +21,18 @@
       <div v-for="category in categories" :key="category.id" class="category-item">
         <div class="category-info">
           <div class="category-image">
-            <img :src="category.imageUrl" :alt="category.name">
+            <img :src="category.image_url || 'https://via.placeholder.com/100'" :alt="category.name">
           </div>
           <div class="category-details">
             <h3>{{ category.name }}</h3>
-            <p>{{ category.description }}</p>
-            <div class="category-stats">
-              <span class="stat">
-                <i class="fas fa-utensils"></i>
-                {{ category.recipeCount || 0 }} Recipes
-              </span>
+            <div class="recipe-count">
+              <i class="fas fa-utensils"></i>
+              {{ category.recipes?.length || 0 }} Recipes
             </div>
           </div>
         </div>
         <div class="category-actions">
-          <button class="action-btn edit">
+          <button class="action-btn edit" @click="editCategory(category)">
             <i class="fas fa-edit"></i>
             Edit
           </button>
@@ -56,6 +53,7 @@ import axios from 'axios'
 const categories = ref([])
 const loading = ref(true)
 const error = ref(null)
+const showAddModal = ref(false)
 
 const fetchCategories = async () => {
   try {
@@ -72,14 +70,19 @@ const fetchCategories = async () => {
 }
 
 const deleteCategory = async (categoryId) => {
-  if (confirm('Are you sure you want to delete this category?')) {
+  if (confirm('Are you sure you want to delete this category? This action cannot be undone.')) {
     try {
       await axios.delete(`http://localhost:9191/api/categories/${categoryId}`)
-      categories.value = categories.value.filter(cat => cat.id !== categoryId)
+      categories.value = categories.value.filter(category => category.id !== categoryId)
     } catch (err) {
       console.error('Error deleting category:', err)
     }
   }
+}
+
+const editCategory = (category) => {
+  // Edit modal will be implemented
+  console.log('Edit category:', category)
 }
 
 onMounted(() => {
@@ -166,11 +169,12 @@ onMounted(() => {
 }
 
 .category-image {
-  width: 80px;
-  height: 80px;
-  border-radius: 0.5rem;
+  width: 100px;
+  height: 100px;
+  border-radius: 0.75rem;
   overflow: hidden;
   flex-shrink: 0;
+  border: 1px solid #e5e7eb;
 }
 
 .category-image img {
@@ -189,23 +193,16 @@ onMounted(() => {
   margin-bottom: 0.5rem;
 }
 
-.category-details p {
-  color: #6b7280;
-  font-size: 0.875rem;
-  margin-bottom: 0.75rem;
-}
-
-.category-stats {
-  display: flex;
-  gap: 1rem;
-}
-
-.stat {
+.recipe-count {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   color: #6b7280;
   font-size: 0.875rem;
+}
+
+.recipe-count i {
+  color: #6366f1;
 }
 
 .category-actions {
@@ -227,8 +224,8 @@ onMounted(() => {
 }
 
 .action-btn.edit {
-  background: #f3f4f6;
-  color: #4b5563;
+  background: #e0e7ff;
+  color: #6366f1;
 }
 
 .action-btn.edit:hover {
@@ -249,6 +246,17 @@ onMounted(() => {
 @media (max-width: 768px) {
   .categories-page {
     padding: 1rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .add-category-btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .category-item {

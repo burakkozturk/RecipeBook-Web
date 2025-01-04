@@ -1058,7 +1058,7 @@ onMounted(() => {
 }
 
 .tab-btn:hover {
-  color: #4f46e5;
+  color: #e91111;
   background: #f1f5f9;
 }
 
