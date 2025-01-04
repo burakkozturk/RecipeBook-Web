@@ -10,12 +10,19 @@ const isAdminRoute = computed(() => route.path.startsWith('/admin'))
 </script>
 
 <template>
-  <Navbar v-if="!isAdminRoute" />
-  <main class="main-content">
-    <router-view />
-  </main>
-  <Footer />
-  <BackToTop />
+  <div class="app">
+    <template v-if="!isAdminRoute">
+      <Navbar />
+      <main class="main-content">
+        <router-view />
+      </main>
+      <Footer />
+      <BackToTop />
+    </template>
+    <template v-else>
+      <router-view />
+    </template>
+  </div>
 </template>
 
 <style>
