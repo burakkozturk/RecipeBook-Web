@@ -5,7 +5,7 @@
         <h1>Admin Panel</h1>
         <router-link to="/" class="home-link">
           <i class="fas fa-home"></i>
-          Ana Sayfaya Dön
+          Back to Site
         </router-link>
       </div>
       <div class="nav-links">
@@ -50,6 +50,9 @@
   display: flex;
   flex-direction: column;
   padding: 1.5rem;
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .nav-header {
@@ -122,6 +125,8 @@
 
 .admin-content {
   flex: 1;
+  margin-left: 280px;
+  padding: 2rem;
   overflow-y: auto;
 }
 
@@ -147,6 +152,11 @@
   .home-link i {
     margin: 0;
     font-size: 1.5rem;
+  }
+
+  .admin-content {
+    margin-left: 80px;
+    padding: 1rem;
   }
 }
 </style> 

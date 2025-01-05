@@ -1,66 +1,30 @@
 <template>
   <div class="categories-page">
-    <!-- Banner Section -->
-    <div class="banner">
-      <div class="container">
-        <div class="banner-content">
-          <h1>Recipe <span class="highlight">Categories</span></h1>
-          <p>Find inspiration and discover amazing recipes from around the world</p>
-        </div>
+    <div class="container">
+      <h2 class="section-title">Explore our most popular recipe categories</h2>
+
+      <div v-if="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading categories...</p>
       </div>
-    </div>
 
-    <!-- Stats Section -->
-    <div class="stats-section">
-      <div class="container">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon">
-              <i class="fas fa-th-large"></i>
-            </div>
-            <div class="stat-content">
-              <h3 class="stat-value">9</h3>
-              <p class="stat-label">Categories</p>
-            </div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-icon">
-              <i class="fas fa-utensils"></i>
-            </div>
-            <div class="stat-content">
-              <h3 class="stat-value">500+</h3>
-              <p class="stat-label">Recipes</p>
-            </div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-icon">
-              <i class="fas fa-users"></i>
-            </div>
-            <div class="stat-content">
-              <h3 class="stat-value">50k+</h3>
-              <p class="stat-label">Happy Cooks</p>
-            </div>
-          </div>
-        </div>
+      <div v-else-if="error" class="error-state">
+        <i class="fas fa-exclamation-circle"></i>
+        <p>{{ error }}</p>
       </div>
-    </div>
 
-    <!-- Categories Grid -->
-    <div class="categories-section">
-      <div class="container">
-        <div class="categories-grid">
-          <div v-for="category in categories" :key="category.id" class="category-card">
-            <router-link :to="`/category/${category.id}`" class="category-content">
-              <div class="category-bg" :style="{ backgroundImage: `url(${getCategoryImage(category.name)})` }"></div>
+      <div v-else class="categories-grid">
+        <div v-for="category in categories" :key="category.id" class="category-card">
+          <router-link :to="`/category/${category.id}`" class="category-content">
+            <div class="category-image">
+              <img :src="category.image_url" :alt="category.name">
               <div class="category-overlay"></div>
-              <div class="category-info">
-                <h2>{{ category.name }}</h2>
-                <span class="recipe-count">{{ getRecipeCount(category.id) }} Recipes</span>
+              <h3>{{ category.name }}</h3>
+              <div class="explore-link">
+                Explore <i class="fas fa-arrow-right"></i>
               </div>
-            </router-link>
-          </div>
+            </div>
+          </router-link>
         </div>
       </div>
     </div>
@@ -68,193 +32,110 @@
 </template>
 
 <script setup>
-import beveragesImg from '@/assets/beverages.jpeg'
-import breadsImg from '@/assets/bread.webp'
-import breakfastImg from '@/assets/breakfast.jpeg'
-import dessertsImg from '@/assets/dessert.webp'
-import dietaryImg from '@/assets/diet.webp'
-import mainCoursesImg from '@/assets/main.webp'
-import saladsImg from '@/assets/salad.webp'
-import snacksImg from '@/assets/snack.webp'
-import soupImg from '@/assets/soup.webp'
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
-const categories = [
-  { id: 6, name: 'Beverages' },
-  { id: 9, name: 'Breads & Fermented Foods' },
-  { id: 7, name: 'Breakfast Foods' },
-  { id: 3, name: 'Desserts' },
-  { id: 8, name: 'Dietary Options' },
-  { id: 2, name: 'Main Courses' },
-  { id: 4, name: 'Salads & Appetizers' },
-  { id: 5, name: 'Snacks' },
-  { id: 1, name: 'Soup' }
-]
+const categories = ref([])
+const loading = ref(true)
+const error = ref(null)
 
-const getCategoryImage = (categoryName) => {
-  const images = {
-    'Beverages': beveragesImg,
-    'Breads & Fermented Foods': breadsImg,
-    'Breakfast Foods': breakfastImg,
-    'Desserts': dessertsImg,
-    'Dietary Options': dietaryImg,
-    'Main Courses': mainCoursesImg,
-    'Salads & Appetizers': saladsImg,
-    'Snacks': snacksImg,
-    'Soup': soupImg
+const fetchCategories = async () => {
+  try {
+    loading.value = true
+    error.value = null
+    const response = await axios.get('http://localhost:9191/api/categories')
+    categories.value = response.data
+  } catch (err) {
+    error.value = 'Failed to load categories. Please try again later.'
+    console.error('Error fetching categories:', err)
+  } finally {
+    loading.value = false
   }
-  return images[categoryName]
 }
 
-// Geçici olarak rastgele tarif sayısı döndüren fonksiyon
-const getRecipeCount = (categoryId) => {
-  return Math.floor(Math.random() * 50) + 10
-}
+onMounted(() => {
+  fetchCategories()
+})
 </script>
 
 <style scoped>
 .categories-page {
-  background-color: #f8fafc;
+  min-height: 100vh;
+  background-color: #ffffff;
+  padding: 4rem 0;
 }
 
-.banner {
-  background-color: #6C63FF;
-  padding: 6rem 0 3rem;
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.section-title {
   text-align: center;
+  font-size: 1.5rem;
+  color: #4b5563;
+  margin-bottom: 3rem;
+  font-weight: 500;
 }
 
-.banner-content {
-  max-width: 800px;
-  margin: 0 auto;
-  color: white;
+.loading-state, .error-state {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
 }
 
-.banner-content h1 {
-  font-size: 3.5rem;
-  font-weight: 800;
-  margin-bottom: 1rem;
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #6C63FF;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  animation: spin 1s linear infinite;
 }
 
-.highlight {
-  color: #FF6B6B;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.banner-content p {
-  font-size: 1.2rem;
-  opacity: 0.9;
-}
-
-.stats-section {
-  margin-top: -2rem;
-  margin-bottom: 4rem;
-  position: relative;
-  z-index: 10;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.stat-card {
-  background: white;
-  padding: .5rem .9rem;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.1);
-}
-
-.stat-icon {
-  width: 64px;
-  height: 64px;
-  background: #f1f5f9;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.8rem;
-  color: #6366f1;
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover .stat-icon {
-  background: #6366f1;
-  color: white;
-  transform: scale(1.1);
-}
-
-.stat-content {
-  flex: 1;
-}
-
-.stat-value {
+.error-state i {
   font-size: 2.5rem;
-  font-weight: 700;
-  color: #1e293b;
-  line-height: 1.2;
-  margin: 0;
-}
-
-.stat-label {
-  font-size: 1rem;
-  color: #64748b;
-  margin: 0;
-  margin-top: 0.3rem;
-}
-
-.categories-section {
-  padding: 2rem 0 5rem;
+  color: #ef4444;
+  margin-bottom: 1rem;
 }
 
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
 }
 
 .category-card {
-  height: 300px;
-  border-radius: 16px;
-  overflow: hidden;
   position: relative;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-}
-
-.category-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  border-radius: 1rem;
+  overflow: hidden;
+  aspect-ratio: 4/3;
 }
 
 .category-content {
-  display: block;
-  height: 100%;
   text-decoration: none;
   color: white;
+  display: block;
+  height: 100%;
 }
 
-.category-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
+.category-image {
+  position: relative;
   width: 100%;
   height: 100%;
-  background-size: cover;
-  background-position: center;
+}
+
+.category-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition: transform 0.5s ease;
 }
 
@@ -267,32 +148,41 @@ const getRecipeCount = (categoryId) => {
   background: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0.2),
-    rgba(0, 0, 0, 0.7)
+    rgba(0, 0, 0, 0.6)
   );
-  transition: all 0.3s ease;
+  transition: background 0.3s ease;
 }
 
-.category-info {
+.category-image h3 {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  padding: 2rem;
+  bottom: 3rem;
+  left: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0;
   z-index: 1;
 }
 
-.category-info h2 {
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.recipe-count {
+.explore-link {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
   font-size: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   opacity: 0.9;
+  z-index: 1;
 }
 
-.category-card:hover .category-bg {
+.explore-link i {
+  font-size: 0.9rem;
+  transition: transform 0.3s ease;
+}
+
+/* Hover Effects */
+.category-card:hover .category-image img {
   transform: scale(1.05);
 }
 
@@ -300,82 +190,60 @@ const getRecipeCount = (categoryId) => {
   background: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0.3),
-    rgba(0, 0, 0, 0.8)
+    rgba(0, 0, 0, 0.7)
   );
 }
 
-@media (max-width: 1200px) {
-  .categories-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.category-card:hover .explore-link i {
+  transform: translateX(5px);
 }
 
-@media (max-width: 1024px) {
-  .stats-grid {
-    gap: 1.5rem;
-    padding: 0 2rem;
-  }
-
-  .stat-card {
-    padding: 1.5rem;
-  }
-
-  .stat-icon {
-    width: 56px;
-    height: 56px;
-    font-size: 1.5rem;
-  }
-
-  .stat-value {
-    font-size: 2rem;
-  }
-}
-
+/* Responsive Design */
 @media (max-width: 768px) {
-  .banner {
-    padding: 4rem 0 2rem;
+  .categories-page {
+    padding: 3rem 0;
   }
 
-  .banner-content h1 {
-    font-size: 2.5rem;
-  }
-
-  .stats-section {
-    margin-top: -2rem;
-    margin-bottom: 2rem;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+  .container {
     padding: 0 1.5rem;
   }
 
-  .stat-card {
-    padding: 1.2rem;
-  }
-
-  .stat-icon {
-    width: 48px;
-    height: 48px;
+  .section-title {
     font-size: 1.3rem;
-  }
-
-  .stat-value {
-    font-size: 1.8rem;
-  }
-
-  .stat-label {
-    font-size: 0.9rem;
+    margin-bottom: 2rem;
   }
 
   .categories-grid {
-    grid-template-columns: 1fr;
     gap: 1.5rem;
   }
 
-  .category-card {
-    height: 250px;
+  .category-image h3 {
+    font-size: 1.5rem;
+    bottom: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .categories-page {
+    padding: 2rem 0;
+  }
+
+  .container {
+    padding: 0 1rem;
+  }
+
+  .section-title {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .category-image h3 {
+    font-size: 1.3rem;
+    bottom: 2rem;
+  }
+
+  .explore-link {
+    font-size: 0.9rem;
   }
 }
 </style> 

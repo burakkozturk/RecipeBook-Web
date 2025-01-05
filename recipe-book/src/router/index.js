@@ -8,6 +8,7 @@ import Categories from '../views/admin/Categories.vue'
 import Dashboard from '../views/admin/Dashboard.vue'
 import AdminRecipes from '../views/admin/Recipes.vue'
 import AdminUsers from '../views/admin/Users.vue'
+import CategoriesView from '@/views/CategoriesView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,6 +32,11 @@ const router = createRouter({
       path: '/profile',
       name: 'profile',
       component: ProfileView
+    },
+    {
+      path: '/categories',
+      name: 'categories',
+      component: CategoriesView
     },
     {
       path: '/admin',

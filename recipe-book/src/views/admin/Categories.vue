@@ -17,29 +17,23 @@
       <p>{{ error }}</p>
     </div>
 
-    <div v-else class="categories-list">
-      <div v-for="category in categories" :key="category.id" class="category-item">
-        <div class="category-info">
-          <div class="category-image">
-            <img :src="category.image_url || 'https://via.placeholder.com/100'" :alt="category.name">
-          </div>
-          <div class="category-details">
-            <h3>{{ category.name }}</h3>
-            <div class="recipe-count">
-              <i class="fas fa-utensils"></i>
-              {{ category.recipes?.length || 0 }} Recipes
-            </div>
-          </div>
+    <div v-else class="categories-grid">
+      <div v-for="category in categories" :key="category.id" class="category-card">
+        <div class="category-image">
+          <img :src="category.image_url" :alt="category.name">
         </div>
-        <div class="category-actions">
-          <button class="action-btn edit" @click="editCategory(category)">
-            <i class="fas fa-edit"></i>
-            Edit
-          </button>
-          <button class="action-btn delete" @click="deleteCategory(category.id)">
-            <i class="fas fa-trash"></i>
-            Delete
-          </button>
+        <div class="category-content">
+          <h3>{{ category.name }}</h3>
+          <div class="category-actions">
+            <button class="action-btn edit" @click="editCategory(category)">
+              <i class="fas fa-edit"></i>
+              Edit
+            </button>
+            <button class="action-btn delete" @click="deleteCategory(category.id)">
+              <i class="fas fa-trash"></i>
+              Delete
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -93,7 +87,7 @@ onMounted(() => {
 <style scoped>
 .categories-page {
   padding: 2rem;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -139,70 +133,51 @@ onMounted(() => {
   margin-bottom: 1rem;
 }
 
-.categories-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
 }
 
-.category-item {
+.category-card {
   background: white;
   border-radius: 1rem;
-  padding: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
-.category-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.category-info {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  flex: 1;
+.category-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 .category-image {
-  width: 100px;
-  height: 100px;
-  border-radius: 0.75rem;
+  position: relative;
+  width: 100%;
+  height: 200px;
   overflow: hidden;
-  flex-shrink: 0;
-  border: 1px solid #e5e7eb;
 }
 
 .category-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.5s ease;
 }
 
-.category-details {
-  flex: 1;
+.category-card:hover .category-image img {
+  transform: scale(1.05);
 }
 
-.category-details h3 {
+.category-content {
+  padding: 1.5rem;
+}
+
+.category-content h3 {
   font-size: 1.25rem;
   color: #1f2937;
-  margin-bottom: 0.5rem;
-}
-
-.recipe-count {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #6b7280;
-  font-size: 0.875rem;
-}
-
-.recipe-count i {
-  color: #6366f1;
+  margin-bottom: 1rem;
 }
 
 .category-actions {
@@ -221,6 +196,8 @@ onMounted(() => {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  flex: 1;
+  justify-content: center;
 }
 
 .action-btn.edit {
@@ -259,19 +236,8 @@ onMounted(() => {
     justify-content: center;
   }
 
-  .category-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
-  .category-info {
-    width: 100%;
-  }
-
-  .category-actions {
-    width: 100%;
-    justify-content: flex-end;
+  .categories-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style> 
