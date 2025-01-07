@@ -1,11 +1,13 @@
 <template>
   <div class="categories-page">
-    <div class="container">
-      <div class="page-header">
+    <div class="banner">
+      <div class="banner-content">
         <h1>Recipe Categories</h1>
-        <p>Explore our delicious recipe collections</p>
+        <p>Discover our delicious recipes</p>
       </div>
+    </div>
 
+    <div class="container">
       <div v-if="loading" class="loading-state">
         <div class="spinner"></div>
         <p>Loading categories...</p>
@@ -46,7 +48,56 @@
 .categories-page {
   min-height: 100vh;
   background: #f8fafc;
-  padding: 0 0 4rem 0;
+}
+
+.banner {
+  position: relative;
+  height: 400px;
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), url('https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=1440') center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4rem;
+  text-align: center;
+}
+
+.banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5));
+  z-index: 1;
+}
+
+.banner-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 3rem;
+  border-radius: 1rem;
+  backdrop-filter: blur(5px);
+}
+
+.banner h1 {
+  font-size: 4rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 1rem;
+  line-height: 1.2;
+  letter-spacing: -1px;
+  text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.banner p {
+  font-size: 1.5rem;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.6;
+  text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .container {
@@ -55,96 +106,14 @@
   padding: 0 2rem;
 }
 
-.page-header {
-  position: relative;
-  background: linear-gradient(120deg, #4338ca 0%, #6366f1 100%);
-  padding: 5rem 0;
-  margin-bottom: 3rem;
-  text-align: center;
-  overflow: hidden;
-}
-
-.page-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('@/assets/pattern-dots.png') repeat;
-  opacity: 0.05;
-  animation: slide 30s linear infinite;
-}
-
-.page-header::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 100%);
-}
-
-.page-header .container {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.page-header h1 {
-  font-size: 4.5rem;
-  color: white;
-  margin: 0;
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -2px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-  background: linear-gradient(to right, #ffffff 0%, #e2e8f0 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: fadeInUp 0.8s ease-out;
-}
-
-.page-header p {
-  color: rgba(255, 255, 255, 0.95);
-  font-size: 1.5rem;
-  line-height: 1.6;
-  font-weight: 400;
-  max-width: 600px;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-  animation: fadeInUp 0.8s ease-out 0.2s backwards;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slide {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 100px 100px;
-  }
-}
-
 .categories-grid {
+  position: relative;
+  z-index: 3;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
+  gap: 1.5rem;
+  padding: 0 2rem;
+  margin-bottom: 4rem;
 }
 
 .category-card {
@@ -153,8 +122,9 @@
   overflow: hidden;
   aspect-ratio: 4/3;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s ease;
   text-decoration: none;
+  background: white;
 }
 
 .category-card:hover {
@@ -188,58 +158,53 @@
   background: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0.2),
-    rgba(0, 0, 0, 0.7)
+    rgba(0, 0, 0, 0.6)
   );
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
 }
 
-.category-card:hover .category-overlay {
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.3),
-    rgba(0, 0, 0, 0.8)
-  );
-}
+
 
 .category-content {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  padding: 2rem;
+  padding: 1.5rem;
   color: white;
   z-index: 1;
 }
 
 .category-content h3 {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  margin: 0 0 0.5rem 0;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  margin: 0 0 0.5rem;
 }
 
 .recipe-count {
-  font-size: 1rem;
+  font-size: 0.875rem;
   opacity: 0.9;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.75rem;
 }
 
 .explore-link {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 500;
+  color: white;
   opacity: 0.9;
   transition: all 0.3s ease;
 }
 
 .explore-link i {
+  font-size: 0.75rem;
   transition: transform 0.3s ease;
 }
 
 .category-card:hover .explore-link i {
-  transform: translateX(5px);
+  transform: translateX(3px);
 }
 
 .loading-state, .error-state {
@@ -270,32 +235,33 @@
 }
 
 @media (max-width: 768px) {
-  .categories-page {
-    padding: 3rem 0;
+  .banner {
+    height: 300px;
   }
 
-  .container {
-    padding: 0 1rem;
+  .banner-content {
+    padding: 2rem;
   }
 
-  .page-header h1 {
-    font-size: 2rem;
+  .banner h1 {
+    font-size: 2.5rem;
   }
 
-  .page-header p {
-    font-size: 1rem;
+  .banner p {
+    font-size: 1.2rem;
   }
 
   .categories-grid {
     gap: 1rem;
+    padding: 0 1rem;
   }
 
   .category-content {
-    padding: 1.5rem;
+    padding: 1.25rem;
   }
 
   .category-content h3 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
   }
 }
 </style>
