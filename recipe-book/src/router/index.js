@@ -39,6 +39,11 @@ const router = createRouter({
       component: CategoriesView
     },
     {
+      path: '/category/:id',
+      name: 'category-detail',
+      component: () => import('../views/CategoryDetailView.vue')
+    },
+    {
       path: '/admin',
       component: () => import('../views/admin/AdminLayout.vue'),
       meta: { requiresAuth: true, requiresAdmin: true },

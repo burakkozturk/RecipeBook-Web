@@ -28,30 +28,26 @@
         <div class="user-info">
           <div class="user-avatar">
             <img :src="user.profilePhoto || 'https://via.placeholder.com/80'" :alt="user.name">
-            <div v-if="user.authorities?.includes('ROLE_ADMIN')" class="admin-badge" title="Admin">
-              <i class="fas fa-shield-alt"></i>
-            </div>
           </div>
           <div class="user-details">
-            <h3>{{ user.name }}</h3>
+            <div class="user-header">
+              <h3>{{ user.name }}</h3>
+              <span class="verification-badge" :class="{ 'verified': user.isVerify }">
+                <i class="fas" :class="user.isVerify ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                {{ user.isVerify ? 'Verified' : 'Not Verified' }}
+              </span>
+            </div>
             <p class="username">@{{ user.username }}</p>
             <div class="user-meta">
               <span class="meta-item">
                 <i class="fas fa-envelope"></i>
                 {{ user.email }}
               </span>
-              <span class="meta-item">
-                <i class="fas fa-calendar"></i>
-                Joined {{ formatDate(user.createdAt) }}
-              </span>
             </div>
           </div>
         </div>
+
         <div class="user-stats">
-          <div class="stat-item">
-            <span class="stat-value">{{ user.recipes?.length || 0 }}</span>
-            <span class="stat-label">Recipes</span>
-          </div>
           <div class="stat-item">
             <span class="stat-value">{{ user.followersCount || 0 }}</span>
             <span class="stat-label">Followers</span>
@@ -61,18 +57,16 @@
             <span class="stat-label">Following</span>
           </div>
         </div>
+
         <div class="user-actions">
-          <button class="action-btn view">
+          <button class="action-btn view" title="View User">
             <i class="fas fa-eye"></i>
-            View
           </button>
-          <button class="action-btn edit">
+          <button class="action-btn edit" title="Edit User">
             <i class="fas fa-edit"></i>
-            Edit
           </button>
-          <button class="action-btn delete" @click="deleteUser(user.id)">
+          <button class="action-btn delete" @click="deleteUser(user.id)" title="Delete User">
             <i class="fas fa-trash"></i>
-            Delete
           </button>
         </div>
       </div>
@@ -105,9 +99,9 @@ const fetchUsers = async () => {
     loading.value = true
     error.value = null
     const response = await axios.get('http://localhost:9191/api/admin/user')
-    users.value = response.data
+    users.value = response.data.users
   } catch (err) {
-    error.value = 'Failed to load users. Please try again later.'
+    error.value = 'Kullanıcılar yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
     console.error('Error fetching users:', err)
   } finally {
     loading.value = false
@@ -150,7 +144,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .page-header h1 {
@@ -169,7 +163,7 @@ onMounted(() => {
   align-items: center;
   gap: 0.5rem;
   background: white;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
   border: 1px solid #e5e7eb;
 }
@@ -189,8 +183,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  padding: 0.5rem 1rem;
+  background: #6366f1;
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -200,7 +194,7 @@ onMounted(() => {
 }
 
 .add-user-btn:hover {
-  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  background: #4f46e5;
   transform: translateY(-1px);
 }
 
@@ -223,31 +217,30 @@ onMounted(() => {
 
 .user-item {
   background: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
+  border-radius: 0.75rem;
+  padding: 1rem;
   display: flex;
   align-items: center;
-  gap: 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
 }
 
 .user-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
   flex: 1;
 }
 
 .user-avatar {
-  position: relative;
-  width: 80px;
-  height: 80px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
@@ -259,68 +252,84 @@ onMounted(() => {
   object-fit: cover;
 }
 
-.admin-badge {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 24px;
-  height: 24px;
-  background: #6366f1;
-  border-radius: 50%;
+.user-details {
+  min-width: 0;
+}
+
+.user-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 0.75rem;
-  border: 2px solid white;
-}
-
-.user-details {
-  flex: 1;
-}
-
-.user-details h3 {
-  font-size: 1.25rem;
-  color: #1f2937;
+  gap: 0.75rem;
   margin-bottom: 0.25rem;
+}
+
+.user-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.verification-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 1rem;
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.verification-badge.verified {
+  background: #dcfce7;
+  color: #10b981;
 }
 
 .username {
   color: #6b7280;
   font-size: 0.875rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.25rem;
 }
 
 .user-meta {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
   color: #6b7280;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
 }
 
 .user-stats {
   display: flex;
-  gap: 2rem;
-  padding: 0 2rem;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0 1.5rem;
   border-left: 1px solid #e5e7eb;
   border-right: 1px solid #e5e7eb;
 }
 
+.stat-divider {
+  width: 1px;
+  height: 2rem;
+  background-color: #e5e7eb;
+}
+
 .stat-item {
   text-align: center;
+  min-width: 70px;
 }
 
 .stat-value {
-  display: block;
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #1f2937;
+  margin-bottom: 0.125rem;
 }
 
 .stat-label {
@@ -330,20 +339,20 @@ onMounted(() => {
 
 .user-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .action-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  border: none;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 0.375rem;
   font-size: 0.875rem;
-  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  border: none;
 }
 
 .action-btn.view {
@@ -351,28 +360,32 @@ onMounted(() => {
   color: #4b5563;
 }
 
-.action-btn.view:hover {
-  background: #6366f1;
-  color: white;
-}
-
 .action-btn.edit {
   background: #e0e7ff;
   color: #6366f1;
 }
 
-.action-btn.edit:hover {
+.action-btn.delete {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+}
+
+.action-btn.view:hover {
   background: #6366f1;
   color: white;
 }
 
-.action-btn.delete {
-  background: #fef2f2;
-  color: #ef4444;
+.action-btn.edit:hover {
+  background: #4f46e5;
+  color: white;
 }
 
 .action-btn.delete:hover {
-  background: #ef4444;
+  background: #dc2626;
   color: white;
 }
 
@@ -383,46 +396,22 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .users-page {
-    padding: 1rem;
-  }
-
-  .page-header {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: stretch;
-  }
-
-  .header-actions {
-    flex-direction: column;
-  }
-
-  .search-box {
-    width: 100%;
-  }
-
-  .search-box input {
-    width: 100%;
-  }
-
   .user-item {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+    padding: 1rem;
   }
 
   .user-info {
     width: 100%;
   }
 
-  .user-meta {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
   .user-actions {
     width: 100%;
     justify-content: flex-end;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e5e7eb;
   }
 }
 </style> 
