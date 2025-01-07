@@ -25,6 +25,10 @@
           <i class="fas fa-tags"></i>
           Categories
         </router-link>
+        <router-link to="/admin/featured" class="nav-link">
+          <i class="fas fa-star"></i>
+          Featured
+        </router-link>
       </div>
     </nav>
     <main class="admin-content">
@@ -46,86 +50,75 @@
 .admin-nav {
   width: 280px;
   background: white;
-  border-right: 1px solid #e5e7eb;
+  padding: 2rem;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
-  padding: 1.5rem;
-  position: fixed;
-  height: 100vh;
-  overflow-y: auto;
+  gap: 2rem;
 }
 
 .nav-header {
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .nav-header h1 {
   font-size: 1.5rem;
   font-weight: 600;
   color: #1f2937;
-  margin-bottom: 1rem;
 }
 
 .home-link {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: #f3f4f6;
-  color: #4b5563;
-  border-radius: 0.5rem;
+  gap: 0.5rem;
+  color: #6366f1;
   text-decoration: none;
   font-size: 0.875rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
   transition: all 0.3s ease;
 }
 
 .home-link:hover {
-  background: #6366f1;
-  color: white;
-  transform: translateY(-1px);
-}
-
-.home-link i {
-  font-size: 1.25rem;
+  background: #f3f4f6;
 }
 
 .nav-links {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  flex: 1;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  color: #6b7280;
+  padding: 1rem;
+  color: #4b5563;
   text-decoration: none;
+  border-radius: 0.5rem;
   transition: all 0.3s ease;
 }
 
 .nav-link i {
   font-size: 1.25rem;
+  width: 24px;
 }
 
 .nav-link:hover {
   background: #f3f4f6;
-  color: #4f46e5;
+  color: #6366f1;
 }
 
 .nav-link.router-link-active {
-  background: #e0e7ff;
-  color: #4f46e5;
+  background: #6366f1;
+  color: white;
 }
 
 .admin-content {
   flex: 1;
-  margin-left: 280px;
   padding: 2rem;
   overflow-y: auto;
 }
@@ -137,26 +130,20 @@
   }
 
   .nav-header h1,
-  .nav-link span,
-  .home-link span {
+  .home-link span,
+  .nav-link span {
     display: none;
   }
 
-  .nav-link,
-  .home-link {
+  .home-link,
+  .nav-link {
     justify-content: center;
     padding: 0.75rem;
   }
 
-  .nav-link i,
-  .home-link i {
+  .nav-link i {
     margin: 0;
     font-size: 1.5rem;
-  }
-
-  .admin-content {
-    margin-left: 80px;
-    padding: 1rem;
   }
 }
 </style> 

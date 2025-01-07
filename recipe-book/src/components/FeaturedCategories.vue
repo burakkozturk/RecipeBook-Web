@@ -45,7 +45,7 @@ const fetchCategories = async () => {
   try {
     loading.value = true
     error.value = null
-    const response = await axios.get('http://localhost:9191/api/categories')
+    const response = await axios.get('http://localhost:9191/api/categories/featured')
     categories.value = response.data
   } catch (err) {
     error.value = 'Failed to load categories. Please try again later.'
