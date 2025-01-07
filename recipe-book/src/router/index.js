@@ -9,6 +9,7 @@ import Dashboard from '../views/admin/Dashboard.vue'
 import AdminRecipes from '../views/admin/Recipes.vue'
 import AdminUsers from '../views/admin/Users.vue'
 import CategoriesView from '@/views/CategoriesView.vue'
+import RecipeDetailView from '@/views/RecipeDetailView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,6 +43,11 @@ const router = createRouter({
       path: '/category/:id',
       name: 'category-detail',
       component: () => import('../views/CategoryDetailView.vue')
+    },
+    {
+      path: '/recipe/:id',
+      name: 'recipe-detail',
+      component: RecipeDetailView
     },
     {
       path: '/admin',
